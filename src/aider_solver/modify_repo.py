@@ -1,18 +1,28 @@
 import argparse
 
-from aider.coders import Coder
-from aider.io import InputOutput
-from aider.models import Model
+from src.config import SETTINGS
+
+if SETTINGS.dev_tool == "aider":
+    from aider.coders import Coder
+    from aider.io import InputOutput
+    from aider.models import Model
+elif SETTINGS.dev_tool == "open_hands":
+    # Import Open Hands specific modules here
+    pass
 
 
 def modify_repo_with_aider(model_name, instance_background, test_command=None) -> None:
-    io = InputOutput(yes=True)
-    model = Model(model_name)
-    coder = Coder.create(main_model=model, io=io)
-    coder.run(instance_background)
+    if SETTINGS.dev_tool == "aider":
+        io = InputOutput(yes=True)
+        model = Model(model_name)
+        coder = Coder.create(main_model=model, io=io)
+        coder.run(instance_background)
 
-    if test_command:
-        coder.run(f"/test {test_command}")
+        if test_command:
+            coder.run(f"/test {test_command}")
+    elif SETTINGS.dev_tool == "open_hands":
+        # Implement Open Hands logic here
+        pass
 
 
 def main():

@@ -11,6 +11,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     foundation_model_name: ModelName = Field(..., description="The name of the model to use.")
+    dev_tool: str = Field("aider", description="The development tool to use (e.g., 'aider', 'open_hands').")
     openai_api_key: str = Field(..., description="The API key for OpenAI.")
     github_pat: str = Field(..., description="The personal access token for GitHub.")
     github_username: str = Field(..., description="The GitHub username.")
