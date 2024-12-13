@@ -40,6 +40,11 @@ def _clean_logs(logs: str) -> str:
 
     except Exception as e:
         logger.error(f"Failed to process logs with GPT-4: {e}")
+        # Placeholder for user feedback
+        user_feedback = input("Provide feedback to the agent (or press Enter to skip): ")
+        if user_feedback:
+            logger.info(f"User feedback: {user_feedback}")
+
         return logs
 
 def launch_container_with_repo_mounted(
@@ -60,6 +65,8 @@ def launch_container_with_repo_mounted(
     ]
     
     logger.info(f"Launching container with entrypoint: {entrypoint}")
+    logger.info(f"Test command: {test_command}")
+    logger.info(f"Instance background: {instance_background}")
     try:
         container = docker_client.containers.run(
             DOCKER_IMAGE,
