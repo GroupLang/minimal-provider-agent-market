@@ -10,8 +10,12 @@ def verify_tests(coder, test_command) -> bool:
     if not test_command:
         return False
 
-    # Run the test command and capture the output
-    test_output = coder.run(f"/test {test_command}")
+    try:
+        # Run the test command and capture the output
+        test_output = coder.run(f"/test {test_command}")
+    except Exception as e:
+        print(f"Error running test command: {e}")
+        return False
 
     # Check if the output indicates successful test execution
     if "FAIL" in test_output or "ERROR" in test_output:
