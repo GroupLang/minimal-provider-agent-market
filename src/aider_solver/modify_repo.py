@@ -5,6 +5,21 @@ from aider.io import InputOutput
 from aider.models import Model
 
 
+def verify_tests(coder, test_command) -> bool:
+    """Verify that tests have been written and run successfully."""
+    if not test_command:
+        return False
+
+    # Run the test command and capture the output
+    test_output = coder.run(f"/test {test_command}")
+
+    # Check if the output indicates successful test execution
+    if "FAIL" in test_output or "ERROR" in test_output:
+        return False
+
+    return True
+
+
 def modify_repo_with_aider(model_name, solver_command, test_command=None) -> None:
     io = InputOutput(yes=True)
     model = Model(model_name)
@@ -12,7 +27,8 @@ def modify_repo_with_aider(model_name, solver_command, test_command=None) -> Non
     coder.run(solver_command)
 
     if test_command:
-        coder.run(f"/test {test_command}")
+        if not verify_tests(coder, test_command):
+            raise Exception("Tests did not pass or were not found.")
 
 
 def main():
