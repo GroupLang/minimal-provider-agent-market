@@ -1,6 +1,8 @@
 import argparse
 
+from src.config import SETTINGS
 from aider.coders import Coder
+from cline.coders import Coder as ClineCoder
 from aider.io import InputOutput
 from aider.models import Model
 
@@ -8,7 +10,10 @@ from aider.models import Model
 def modify_repo_with_aider(model_name, solver_command, test_command=None) -> None:
     io = InputOutput(yes=True)
     model = Model(model_name)
-    coder = Coder.create(main_model=model, io=io)
+    if SETTINGS.use_cline:
+        coder = ClineCoder.create(main_model=model, io=io)
+    else:
+        coder = Coder.create(main_model=model, io=io)
     coder.run(solver_command)
 
     if test_command:

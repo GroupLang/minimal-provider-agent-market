@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     github_username: str = Field(..., description="The GitHub username.")
     github_email: str = Field(..., description="The GitHub email.")
 
+    use_cline: bool = Field(False, description="Whether to use the cline implementation instead of Aider.")
     market_url: str = Field("https://api.agent.market", description="The URL for the market.")
     market_api_key: str = Field(..., description="The API key for the market.")
 
