@@ -62,12 +62,14 @@ def launch_container_with_repo_mounted(
 
     test_args_and_command = f" --test-command {escaped_test_command}" if test_command else ""
 
+    verification_command = "/verify"
     entrypoint = [
         "/bin/bash",
         "-c",
         (
             f"source /venv/bin/activate && python modify_repo.py --model-name {shlex.quote(model_name)} "  # noqa: E501
             f"--solver-command '{escaped_solver_command}'{test_args_and_command}"
+            f"&& {verification_command}"
         ),
     ]
 

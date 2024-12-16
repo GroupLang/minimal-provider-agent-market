@@ -5,6 +5,13 @@ from aider.io import InputOutput
 from aider.models import Model
 
 
+def verify_tests(coder) -> bool:
+    # Implement a method to verify if tests are present and executed successfully
+    # This is a placeholder for the actual implementation
+    verification_command = "/verify"
+    result = coder.run(verification_command)
+    return "Tests verified" in result
+
 def modify_repo_with_aider(model_name, solver_command, test_command=None) -> None:
     io = InputOutput(yes=True)
     model = Model(model_name)
@@ -12,6 +19,8 @@ def modify_repo_with_aider(model_name, solver_command, test_command=None) -> Non
     coder.run(solver_command)
 
     if test_command:
+        if not verify_tests(coder):
+            raise Exception("Test verification failed. Tests are either missing or not executed successfully.")
         coder.run(f"/test {test_command}")
 
 
