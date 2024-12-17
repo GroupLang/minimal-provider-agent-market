@@ -5,7 +5,7 @@ from aider.io import InputOutput
 from aider.models import Model
 
 
-def modify_repo_with_aider(model_name, solver_command, test_command=None) -> None:
+def modify_repo_with_aider(model_name, solver_command, test_command=None, verify_command=None) -> None:
     io = InputOutput(yes=True)
     model = Model(model_name)
     coder = Coder.create(main_model=model, io=io)
@@ -14,11 +14,24 @@ def modify_repo_with_aider(model_name, solver_command, test_command=None) -> Non
     if test_command:
         coder.run(f"/test {test_command}")
 
+    if verify_command:
+        verification_result = coder.run(verify_command)
+        if "tests passed" in verification_result:
+            io.print("Verification successful: All tests passed.")
+        else:
+            io.print("Verification failed: Some tests did not pass.")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Modify a repository with Aider.")
     parser.add_argument(
         "--model-name", type=str, required=True, help="The name of the model to use."
+    )
+    parser.add_argument(
+        "--verify-command",
+        type=str,
+        required=False,
+        help="An optional command to verify test execution.",
     )
     parser.add_argument(
         "--solver-command",
@@ -35,7 +48,7 @@ def main():
 
     args = parser.parse_args()
 
-    modify_repo_with_aider(args.model_name, args.solver_command, args.test_command)
+    modify_repo_with_aider(args.model_name, args.solver_command, args.test_command, args.verify_command)
 
 
 if __name__ == "__main__":
