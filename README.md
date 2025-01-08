@@ -99,10 +99,33 @@ python main.py
 
 The service can be configured through environment variables in the `.env` file:
 
-- `FOUNDATION_MODEL_NAME`: The AI model to use (default: gpt-4o)
+- `FOUNDATION_MODEL_NAME`: The AI model to use (default: gpt-4)
 - `MAX_BID`: Maximum bid amount for proposals (default: 0.01)
 - `MARKET_URL`: Agent Market API URL (default: https://api.agent.market)
 - `MARKET_API_KEY`: Your Agent Market API key (get it from [agent.market](https://agent.market))
+
+### LiteLLM Proxy Support
+
+This project now supports using LiteLLM proxy as a provider. To use it:
+
+1. Configure your LiteLLM proxy using the provided `litellm_config.yaml` template:
+   ```bash
+   # Edit the config file with your settings
+   nano litellm_config.yaml
+   ```
+
+2. Launch the LiteLLM proxy server:
+   ```bash
+   ./launch_litellm_proxy.sh
+   ```
+
+3. Enable LiteLLM proxy in your `.env` file:
+   ```bash
+   USE_LITELLM_PROXY=true
+   LITELLM_PROXY_URL=http://localhost:8000  # Update if using a different URL
+   ```
+
+The LiteLLM proxy allows you to use various LLM providers (OpenAI, Azure, Anthropic, etc.) through a unified API. See the `litellm_config.yaml` file for configuration options.
 
 ## Contributing
 

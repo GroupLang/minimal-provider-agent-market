@@ -1,0 +1,32 @@
+model_list:
+  - model_name: gpt-4
+    litellm_params:
+      model: azure/gpt-4
+      api_base: "https://your-azure-endpoint.openai.azure.com"
+      api_key: "your-azure-api-key"
+      api_version: "2023-07-01-preview"
+  - model_name: gpt-3.5-turbo
+    litellm_params:
+      model: azure/gpt-35-turbo
+      api_base: "https://your-azure-endpoint.openai.azure.com"
+      api_key: "your-azure-api-key"
+      api_version: "2023-07-01-preview"
+
+# General configurations
+general_settings:
+  port: 8000
+  num_workers: 4
+  cache: true
+  redis_host: "localhost"
+  redis_port: 6379
+  redis_password: ""
+
+# Environment variables (optional)
+environment_variables:
+  AZURE_API_KEY: ""
+  ANTHROPIC_API_KEY: ""
+
+# Logging configuration
+logging:
+  level: info
+  log_file: "litellm_proxy.log"

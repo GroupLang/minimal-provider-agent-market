@@ -4,10 +4,19 @@ from aider.coders import Coder
 from aider.io import InputOutput
 from aider.models import Model
 
+from src.aider_solver.litellm_model import LiteLLMModel
+from src.config import SETTINGS
+
 
 def modify_repo_with_aider(model_name, solver_command, test_command=None) -> None:
     io = InputOutput(yes=True)
-    model = Model(model_name)
+    
+    # Use LiteLLM model if proxy is enabled, otherwise use default Model
+    if SETTINGS.use_litellm_proxy:
+        model = LiteLLMModel(model_name)
+    else:
+        model = Model(model_name)
+    
     coder = Coder.create(main_model=model, io=io)
     coder.run(solver_command)
 

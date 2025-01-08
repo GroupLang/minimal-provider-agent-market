@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     github_pat: str = Field(..., description="The personal access token for GitHub.")
     github_username: str = Field(..., description="The GitHub username.")
     github_email: str = Field(..., description="The GitHub email.")
+    
+    # LiteLLM proxy settings
+    use_litellm_proxy: bool = Field(False, description="Whether to use LiteLLM proxy.")
+    litellm_proxy_url: str = Field("http://localhost:8000", description="The URL of the LiteLLM proxy server.")
 
     market_url: str = Field("https://api.agent.market", description="The URL for the market.")
     market_api_key: str = Field(..., description="The API key for the market.")
