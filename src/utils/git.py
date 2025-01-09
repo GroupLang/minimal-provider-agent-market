@@ -26,13 +26,88 @@ def clone_repository(repo_url: str, target_dir: str) -> None:
     logger.info(f"Cloned repository from {repo_url} to {target_dir}")
 
 
+def sync_fork_with_upstream(repo_name: str, github_token: str) -> None:
+    """Sync a forked repository with its upstream repository to ensure it's up to date.
+    
+    This function checks if the fork is behind its upstream repository and if so,
+    updates it to match the upstream's default branch. It handles branch protection
+    rules and performs a merge from the upstream repository.
+    
+    Args:
+        repo_name: The repository name in format 'owner/repo'
+        github_token: GitHub personal access token for authentication
+        
+    Raises:
+        github.GithubException: If there's an error accessing the repositories or
+            performing the sync operation
+    """
+    g = github.Github(github_token)
+    forked_repo = g.get_repo(repo_name)
+    
+    if not forked_repo.fork:
+        logger.info(f"Repository {repo_name} is not a fork")
+        return
+        
+    parent_repo = forked_repo.parent
+    if not parent_repo:
+        logger.error(f"Could not find parent repository for {repo_name}")
+        return
+        
+    # Get the default branch name from parent repo
+    default_branch = parent_repo.default_branch
+    
+    try:
+        # Get the comparison between fork and upstream
+        comparison = parent_repo.compare(
+            base=f"{forked_repo.owner.login}:{default_branch}",
+            head=f"{parent_repo.owner.login}:{default_branch}"
+        )
+        
+        if comparison.behind_by > 0:
+            logger.info(f"Fork is {comparison.behind_by} commits behind upstream")
+            # Update fork's default branch to match upstream
+            forked_repo.get_branch(default_branch).edit_protection(enforce_admins=False)
+            forked_repo.merge(
+                base=default_branch,
+                head=f"{parent_repo.owner.login}:{default_branch}",
+                commit_message="Sync fork with upstream repository"
+            )
+            logger.info(f"Successfully synced fork with upstream")
+        else:
+            logger.info("Fork is up to date with upstream")
+            
+    except github.GithubException as e:
+        logger.error(f"Error syncing fork with upstream: {e}")
+        raise
+
 def fork_repo(github_url: str, github_token: str) -> str:
+    """Fork a GitHub repository and ensure it's synced with the upstream repository.
+    
+    This function performs the following steps:
+    1. Creates a fork of the specified repository
+    2. Syncs the newly created fork with its upstream repository
+    3. Returns the clone URL of the forked repository
+    
+    Args:
+        github_url: URL of the GitHub repository to fork
+        github_token: GitHub personal access token for authentication
+        
+    Returns:
+        str: Clone URL of the forked repository
+        
+    Raises:
+        github.GithubException: If there's an error creating the fork or syncing with upstream
+    """
     g = github.Github(github_token)
     repo_path = github_url.replace("https://github.com/", "").removesuffix(".git")
     repo = g.get_repo(repo_path)
     user = g.get_user()
     forked_repo = user.create_fork(repo)
     logger.info("Forked repo: {}", forked_repo.clone_url)
+    
+    # Sync the newly created fork with upstream
+    sync_fork_with_upstream(forked_repo.full_name, github_token)
+    
     return forked_repo.clone_url
 
 
@@ -206,7 +281,25 @@ def set_git_config(username: str, email: str, repo_dir: str):
         raise
 
 
-def create_and_push_branch(repo_path, branch_name, github_token):
+def create_and_push_branch(repo_path: str, branch_name: str, github_token: str) -> None:
+    """Create and push a new branch to a forked repository, ensuring it's synced with upstream first.
+    
+    This function performs the following steps:
+    1. Initializes the repository at the given path
+    2. Syncs the fork with its upstream repository to ensure it's up to date
+    3. Creates a new branch (if it doesn't exist)
+    4. Checks out the branch and pulls latest changes
+    5. Pushes the branch to the remote repository
+    
+    Args:
+        repo_path: Path to the local git repository
+        branch_name: Name of the branch to create and push
+        github_token: GitHub personal access token for authentication
+        
+    Raises:
+        Exception: If the repository is bare or if the remote URL format is invalid
+        github.GithubException: If there's an error performing GitHub operations
+    """
     try:
         repo = git.Repo(repo_path)
         logger.info(f"Repository initialized at {repo_path}.")
@@ -214,6 +307,24 @@ def create_and_push_branch(repo_path, branch_name, github_token):
         if repo.bare:
             logger.error("The repository is bare. Cannot perform operations.")
             raise Exception("The repository is bare. Cannot perform operations.")
+
+        # Get the repository name from remote URL
+        remote_url = repo.remotes.origin.url
+        if remote_url.startswith("https://"):
+            repo_name = remote_url.split("github.com/")[-1].removesuffix(".git")
+        elif remote_url.startswith("git@"):
+            repo_name = remote_url.split(":")[-1].removesuffix(".git")
+        else:
+            logger.error("Unrecognized remote URL format.")
+            raise Exception("Invalid remote URL format.")
+
+        # Sync fork with upstream before creating new branch
+        sync_fork_with_upstream(repo_name, github_token)
+        logger.info("Ensured fork is in sync with upstream")
+
+        # Fetch all changes from remote
+        repo.remotes.origin.fetch()
+        logger.info("Fetched latest changes from remote")
 
         if branch_name in repo.heads:
             logger.info(f"Branch '{branch_name}' already exists locally.")
