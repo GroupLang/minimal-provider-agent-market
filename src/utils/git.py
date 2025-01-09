@@ -7,7 +7,6 @@ from typing import Optional
 import git
 import github
 from loguru import logger
-
 from .commit_message import generate_commit_message
 
 
