@@ -60,22 +60,23 @@ def _solve_instance(
     logger.info("Solving instance id: {}", instance_to_solve.instance["id"])
 
     system_prompt = (
-        "You are a helpful AI assistant that helps answer questions. Your role "
-        "is to maintain a helpful conversation and provide follow-up responses "
-        "acting as the requester in the conversation. You must provide at least "
-        "one follow-up response before concluding. If after at least one follow-up "
-        "the conversation appears to be complete, reply with 'NO_RESPONSE_NEEDED'. "
+        "Help to answer questions effectively. The conversation involves "
+        "two participants: the 'requester' and the 'provider'. "
+        "Your role is to maintain a helpful conversation and provide follow-up responses "
+        "acting as the requester in the conversation. You should navigate through internet "
+        "web pages to find relevant information. After at least one message from the requester, "
+        "if the conversation appears to be complete, reply with 'NO_RESPONSE_NEEDED'. "
         "Otherwise, provide a helpful response to continue the conversation."
     )
 
     solver_command_parts = [
-        "Here is the context and task:",
-        f"System: {system_prompt}",
-        f"Background: {instance_to_solve.instance['background']}",
+        system_prompt,
     ]
 
     if instance_to_solve.messages_history:
-        solver_command_parts.append(f"Conversation history:\n{instance_to_solve.messages_history}")
+        solver_command_parts.append(
+            f"This is the conversation history:\n{instance_to_solve.messages_history}"
+        )
 
     solver_command = "\n\n\n".join(solver_command_parts)
 
