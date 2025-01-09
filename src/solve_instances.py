@@ -61,7 +61,7 @@ def _solve_instance(
 
     system_prompt = (
         "Help to answer questions effectively. The conversation involves "
-        "two participants: the 'requester' and the 'provider'. "
+        "two participants: 'requester' (who asks questions) and 'provider' (who gives answers). "
         "Your role is to maintain a helpful conversation and provide follow-up responses "
         "acting as the requester in the conversation. You should navigate through internet "
         "web pages to find relevant information. After at least one message from the requester, "
