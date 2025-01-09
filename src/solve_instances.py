@@ -41,7 +41,7 @@ def _get_instance_to_solve(instance_id: str, settings: Settings) -> Optional[Ins
 
         sorted_messages = sorted(chat, key=lambda m: m["timestamp"])
         last_message = sorted_messages[-1]
-        provider_needs_response = last_message["sender"] == "provider"
+        provider_needs_response = last_message["sender"] == "provider" and len(sorted_messages) < 5
 
         messages_history = "\n\n".join(
             [f"{message['sender']}: {message['message']}" for message in sorted_messages]
@@ -62,8 +62,9 @@ def _solve_instance(
     system_prompt = (
         "You are a helpful AI assistant that helps answer questions. Your role "
         "is to maintain a helpful conversation and provide follow-up responses "
-        "acting as the requester in the conversation. If the conversation "
-        "appears to be complete, reply with 'NO_RESPONSE_NEEDED'. "
+        "acting as the requester in the conversation. You must provide at least "
+        "one follow-up response before concluding. If after at least one follow-up "
+        "the conversation appears to be complete, reply with 'NO_RESPONSE_NEEDED'. "
         "Otherwise, provide a helpful response to continue the conversation."
     )
 
