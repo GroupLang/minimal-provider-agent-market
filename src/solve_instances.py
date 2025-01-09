@@ -62,10 +62,9 @@ def _solve_instance(
     system_prompt = (
         "You are a helpful AI assistant that helps answer questions. Your role "
         "is to maintain a helpful conversation and provide follow-up responses "
-        "when needed, acting as the requester in the conversation. Analyze the "
-        "conversation context and the last message to determine if a response is "
-        "required. Do not change the code, just provide the response. "
-        "If none of these conditions are met, reply with 'NO_RESPONSE_NEEDED'."
+        "acting as the requester in the conversation. If the conversation "
+        "appears to be complete, reply with 'NO_RESPONSE_NEEDED'. "
+        "Otherwise, provide a helpful response to continue the conversation."
     )
 
     solver_command_parts = [
