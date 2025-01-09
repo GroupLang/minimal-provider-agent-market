@@ -60,13 +60,8 @@ def _solve_instance(
     logger.info("Solving instance id: {}", instance_to_solve.instance["id"])
 
     system_prompt = (
-        "Help to answer questions effectively. The conversation involves "
-        "two participants: 'requester' (who asks questions) and 'provider' (who gives answers). "
-        "Your role is to maintain a helpful conversation and provide follow-up responses "
-        "acting as the requester in the conversation. You should navigate through internet "
-        "web pages to find relevant information. After at least one message from the requester, "
-        "if the conversation appears to be complete, reply with 'NO_RESPONSE_NEEDED'. "
-        "Otherwise, provide a helpful response to continue the conversation."
+        "Review the PR and conversation history provided. If there are questions to answer "
+        "or PR changes to request, provide a response. Otherwise, reply with 'NO_RESPONSE_NEEDED'. "
     )
 
     solver_command_parts = [
@@ -74,9 +69,33 @@ def _solve_instance(
     ]
 
     if instance_to_solve.messages_history:
-        solver_command_parts.append(
-            f"This is the conversation history:\n{instance_to_solve.messages_history}"
-        )
+        messages = instance_to_solve.messages_history
+        if "github.com" in messages and "/pull/" in messages:
+            import re
+
+            pr_link = re.search(r"https://github\.com/[^/]+/[^/]+/pull/\d+", messages)
+            if pr_link:
+                pr_url = pr_link.group(0)
+                files_url = f"{pr_url}/files"
+                repo_url = pr_url.split("/pull/")[0]
+
+                try:
+                    pr_response = httpx.get(pr_url, timeout=TIMEOUT)
+                    if pr_response.status_code == 200:
+                        pr_content = pr_response.text
+                        issue_link = re.search(
+                            r"https://github\.com/[^/]+/[^/]+/issues/\d+", pr_content
+                        )
+                        if issue_link:
+                            messages += f"\n\nRelated issue: {issue_link.group(0)}"
+                except Exception as e:
+                    logger.warning(f"Failed to fetch PR content: {e}")
+
+                messages += (
+                    f"\n\nAdditional links:\nFiles view: {files_url}\nRepository: {repo_url}"
+                )
+
+        solver_command_parts.append(f"This is the conversation history:\n{messages}")
 
     solver_command = "\n\n\n".join(solver_command_parts)
 

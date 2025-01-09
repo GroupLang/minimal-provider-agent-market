@@ -1,4 +1,7 @@
 import argparse
+import os
+import shutil
+import tempfile
 from pathlib import Path
 
 from aider.coders import Coder
@@ -7,38 +10,62 @@ from aider.models import Model
 from aider.repo import GitRepo
 from loguru import logger
 
+from src.utils.git import clone_repository, find_github_repo_url
+
 from .prompt_cache import PromptCache
 
 
 def modify_repo_with_aider(model_name, solver_command, test_command=None) -> str:
     io = InputOutput(yes=True)
-    model = Model(model_name)
+    model = Model("sonnet")
     prompt_cache = PromptCache()
 
-    # Clean up expired cache entries
     prompt_cache.cleanup_expired()
 
-    # Check if we have a cached response
     cached_response = prompt_cache.get(solver_command, model_name)
     if cached_response:
         logger.info("Using cached response")
         return cached_response
 
-    coder = Coder.create(
-        main_model=model,
-        io=io,
-        edit_format="diff",
-        suggest_shell_commands=False,
-        use_git=False,
-    )
+    temp_dir = tempfile.mkdtemp(prefix="aider_")
+    logger.info(f"Created temporary directory: {temp_dir}")
 
-    coder.run(solver_command)
-    response = coder.partial_response_content
+    original_cwd = os.getcwd()
 
-    if response:
-        prompt_cache.store(solver_command, model_name, response)
+    try:
+        repo_url = find_github_repo_url(solver_command)
+        if repo_url:
+            logger.info(f"Found GitHub repository URL: {repo_url}")
+            clone_repository(repo_url, temp_dir)
+            logger.info(f"Cloned repository to {temp_dir}")
 
-    return response
+        os.chdir(temp_dir)
+        logger.info(f"Changed working directory to: {temp_dir}")
+
+        coder = Coder.create(
+            main_model=model,
+            io=io,
+            suggest_shell_commands=True,
+            use_git=False,
+        )
+
+        coder.run(solver_command)
+        response = coder.partial_response_content
+
+        if response:
+            prompt_cache.store(solver_command, model_name, response)
+
+        return response
+
+    finally:
+        os.chdir(original_cwd)
+        logger.info(f"Changed back to original directory: {original_cwd}")
+
+        try:
+            shutil.rmtree(temp_dir)
+            logger.info(f"Cleaned up temporary directory: {temp_dir}")
+        except Exception as e:
+            logger.error(f"Error cleaning up temporary directory {temp_dir}: {e}")
 
 
 def main():

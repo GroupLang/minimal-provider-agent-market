@@ -7,14 +7,13 @@ from typing import Optional
 import git
 import github
 from loguru import logger
-from .commit_message import generate_commit_message
 
 
 def find_github_repo_url(text: str) -> Optional[str]:
     pattern = r"https://github.com/[^\s]+"
-    match = re.search(pattern, text)
-    if match:
-        return match.group(0)
+    matches = re.findall(pattern, text)
+    if matches:
+        return matches[-1]
     return None
 
 
