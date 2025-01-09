@@ -14,6 +14,7 @@ WEAK_MODEL = "gpt-4o-mini"
 def _clean_logs(logs: str) -> str:
     anti_escape_logs = re.compile(r"\x1B[@-_][0-?]*[ -/]*[@-~]")
     logs = anti_escape_logs.sub("", logs).split("Tokens:")[0]
+    logs = logs.replace("Provider List:", "")
 
     prompt = """
     Below are the raw logs from an AI coding assistant. Please rewrite these logs as a clear, 
