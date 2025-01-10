@@ -60,8 +60,9 @@ def _solve_instance(
     logger.info("Solving instance id: {}", instance_to_solve.instance["id"])
 
     system_prompt = (
-        "Review the PR and conversation history provided. If there are questions to answer "
-        "or PR changes to request, provide a response. Otherwise, reply with 'NO_RESPONSE_NEEDED'. "
+        "You are a code reviewer examining this PR and conversation history. "
+        "If there are questions to answer or PR changes to request, provide a response. "
+        "Otherwise, reply with 'NO_RESPONSE_NEEDED'. Be thorough but constructive in your review."
     )
 
     solver_command_parts = [

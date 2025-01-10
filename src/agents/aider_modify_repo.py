@@ -46,7 +46,9 @@ def modify_repo_with_aider(model_name, solver_command, test_command=None) -> str
             main_model=model,
             io=io,
             suggest_shell_commands=True,
-            use_git=False,
+            auto_commits=False,
+            dirty_commits=False,
+            auto_lint=False,
         )
 
         coder.run(solver_command)
@@ -56,6 +58,10 @@ def modify_repo_with_aider(model_name, solver_command, test_command=None) -> str
             prompt_cache.store(solver_command, model_name, response)
 
         return response
+
+    except Exception as e:
+        logger.exception(f"Error during execution: {str(e)}")
+        return None
 
     finally:
         os.chdir(original_cwd)
