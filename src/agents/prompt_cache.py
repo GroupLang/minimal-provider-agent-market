@@ -8,12 +8,12 @@ from loguru import logger
 
 
 class PromptCache:
-    def __init__(self, cache_dir: str = "/tmp/aider_cache/prompts", cache_ttl_hours: int = 24):
+    def __init__(self, cache_dir: str = "/tmp/aider_cache/prompts", cache_ttl_days: int = 30):
         self.cache_dir = Path(cache_dir)
-        self.cache_ttl = timedelta(hours=cache_ttl_hours)
+        self.cache_ttl = timedelta(days=cache_ttl_days)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         logger.info(
-            f"Initialized prompt cache at {self.cache_dir} with TTL of {cache_ttl_hours} hours"
+            f"Initialized prompt cache at {self.cache_dir} with TTL of {cache_ttl_days} days"
         )
 
     def _get_cache_key(self, prompt: str, model_name: str) -> str:

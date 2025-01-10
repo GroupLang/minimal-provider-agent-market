@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 import httpx
+import openai
 from loguru import logger
 
 from src.agents.aider_modify_repo import modify_repo_with_aider
@@ -10,6 +11,9 @@ from src.config import SETTINGS, Settings
 from src.enums import ModelName
 
 TIMEOUT = httpx.Timeout(10.0)
+
+openai.api_key = SETTINGS.openai_api_key
+WEAK_MODEL = "gpt-4o-mini"
 
 
 @dataclass
@@ -52,6 +56,33 @@ def _get_instance_to_solve(instance_id: str, settings: Settings) -> Optional[Ins
             messages_history=messages_history,
             provider_needs_response=provider_needs_response,
         )
+
+
+def _clean_response(response: str) -> str:
+    prompt = """
+    Below is a code review response. Clean up any formatting issues, remove redundant text, 
+    and ensure consistent spacing. Do not change the content or meaning of the feedback.
+
+    Response:
+    {feedback}
+    """
+
+    try:
+        cleaned = openai.chat.completions.create(
+            model=WEAK_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant that cleans up text formatting.",
+                },
+                {"role": "user", "content": prompt.format(feedback=response)},
+            ],
+        )
+        return cleaned.choices[0].message.content.strip()
+
+    except Exception as e:
+        logger.error(f"Failed to clean response with GPT-4: {e}")
+        return response
 
 
 def _solve_instance(
@@ -110,7 +141,8 @@ def _solve_instance(
             logger.info("No response needed for this instance")
             return None
 
-        return response.strip()
+        cleaned_response = _clean_response(response.strip())
+        return cleaned_response
 
     except Exception as e:
         logger.error(

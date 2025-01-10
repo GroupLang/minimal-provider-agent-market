@@ -1,7 +1,10 @@
 import argparse
+import io
 import os
 import shutil
+import sys
 import tempfile
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 from aider.coders import Coder
@@ -16,7 +19,7 @@ from .prompt_cache import PromptCache
 
 
 def modify_repo_with_aider(model_name, solver_command, test_command=None) -> str:
-    io = InputOutput(yes=True)
+    io_instance = InputOutput(yes=True)
     model = Model("sonnet")
     prompt_cache = PromptCache()
 
@@ -27,37 +30,42 @@ def modify_repo_with_aider(model_name, solver_command, test_command=None) -> str
         logger.info("Using cached response")
         return cached_response
 
+    output_buffer = io.StringIO()
+
     temp_dir = tempfile.mkdtemp(prefix="aider_")
     logger.info(f"Created temporary directory: {temp_dir}")
 
     original_cwd = os.getcwd()
 
     try:
-        repo_url = find_github_repo_url(solver_command)
-        if repo_url:
-            logger.info(f"Found GitHub repository URL: {repo_url}")
-            clone_repository(repo_url, temp_dir)
-            logger.info(f"Cloned repository to {temp_dir}")
+        with redirect_stdout(output_buffer), redirect_stderr(output_buffer):
+            repo_url = find_github_repo_url(solver_command)
+            if repo_url:
+                logger.info(f"Found GitHub repository URL: {repo_url}")
+                clone_repository(repo_url, temp_dir)
+                logger.info(f"Cloned repository to {temp_dir}")
 
-        os.chdir(temp_dir)
-        logger.info(f"Changed working directory to: {temp_dir}")
+            os.chdir(temp_dir)
+            logger.info(f"Changed working directory to: {temp_dir}")
 
-        coder = Coder.create(
-            main_model=model,
-            io=io,
-            suggest_shell_commands=True,
-            auto_commits=False,
-            dirty_commits=False,
-            auto_lint=False,
-        )
+            coder = Coder.create(
+                main_model=model,
+                io=io_instance,
+                suggest_shell_commands=True,
+                auto_commits=False,
+                dirty_commits=False,
+                auto_lint=False,
+            )
 
-        coder.run(solver_command)
-        response = coder.partial_response_content
+            coder.run(solver_command)
 
-        if response:
-            prompt_cache.store(solver_command, model_name, response)
+        full_output = output_buffer.getvalue()
+        logger.info(f"Full output: {full_output}")
 
-        return response
+        if full_output:
+            prompt_cache.store(solver_command, model_name, full_output)
+
+        return full_output
 
     except Exception as e:
         logger.exception(f"Error during execution: {str(e)}")
