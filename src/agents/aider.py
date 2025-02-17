@@ -94,12 +94,13 @@ def get_container_kwargs(
         "-c",
         (
             "source /venv/bin/activate && "
-            f"python modify_repo.py --model-name {shlex.quote(model_name)} "
+            f"aider --architect --model openrouter/deepseek/deepseek-r1 --editor-model openrouter/anthropic/claude-3.5-sonnet "
             f"--solver-command '{escaped_solver_command}' "
             f"{test_args_and_command}"
         ).strip(),
     ]
     env_vars = {key: os.getenv(key) for key in os.environ.keys()}
+    env_vars['OPENROUTER_API_KEY'] = SETTINGS.openrouter_api_key
     volumes = {
         f"{repo_directory}/.": {"bind": "/app", "mode": "rw"},
         "/tmp/aider_cache": {"bind": "/home/ubuntu", "mode": "rw"},
