@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     litellm_local_api_base: str = Field(
         "http://0.0.0.0:4000", description="The local API base for LiteLLM"
     )
+    aws_access_key_id: str = Field(..., description="The AWS access key ID for Bedrock")
+    aws_secret_access_key: str = Field(..., description="The AWS secret access key for Bedrock")
+    aws_region_name: str = Field("us-east-1", description="The AWS region name for Bedrock")
 
     class Config:
         case_sensitive = False
