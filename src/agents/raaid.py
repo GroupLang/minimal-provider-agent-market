@@ -4,6 +4,18 @@ from src.config import SETTINGS
 from src.enums import ModelName
 
 
+def parse_aider_flags() -> str:
+    """Parse aider flags from environment variable.
+    
+    Reads flags from AIDER_FLAGS environment variable. If not set, defaults to architect-mode.
+    Each flag in the comma-separated list is converted to a command line argument.
+    
+    Returns:
+        Formatted string of aider command line flags.
+    """
+    flags = os.getenv("AIDER_FLAGS", "architect-mode").split(",")
+    return " ".join(f"--{flag.strip()}" for flag in flags if flag.strip())
+
 def get_container_kwargs(
     repo_directory: str,
     solver_command: str,
@@ -12,12 +24,14 @@ def get_container_kwargs(
     expert_model: str = "openrouter/deepseek/deepseek-r1",
 ) -> str:
     escaped_solver_command = solver_command.replace('"', '\\"')
+    aider_flags = parse_aider_flags()
+    
     entrypoint = [
         "/bin/bash",
         "-c",
         (
             "source /venv/bin/activate && "
-            f'ra-aid -m "{escaped_solver_command}" --provider openai-compatible --model {model_name.value} --expert-provider {expert_provider} --expert-model {expert_model} --cowboy-mode'  # noqa: E501
+            f'ra-aid -m "{escaped_solver_command}" --provider openai-compatible --model {model_name.value} --expert-provider {expert_provider} --expert-model {expert_model} --cowboy-mode {aider_flags}'  # noqa: E501
         ).strip(),
     ]
 
