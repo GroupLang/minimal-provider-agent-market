@@ -1,4 +1,6 @@
 import re
+import os
+from datetime import datetime
 
 import openai
 from docker import from_env as docker_from_env
@@ -12,7 +14,7 @@ WEAK_MODEL = "gpt-4o-mini"
 
 
 def _clean_logs(logs: str) -> str:
-    anti_escape_logs = re.compile(r"\x1B[@-_][0-?]*[ -/]*[@-~]")
+    anti_escape_logs = re.compile(r"\\x1B[@-_][0-?]*[ -/]*[@-~]")
     logs = anti_escape_logs.sub("", logs).split("Tokens:")[0]
 
     prompt = """
@@ -43,7 +45,20 @@ def _clean_logs(logs: str) -> str:
         return logs
 
 
+def _store_container_logs(agent_type: str, logs: str) -> None:
+    try:
+        os.makedirs("logs", exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"logs/{agent_type}_{timestamp}.log"
+        with open(filename, "w") as f:
+            f.write(logs)
+        logger.info(f"Logs saved to {filename}")
+    except Exception as e:
+        logger.error(f"Failed to store logs: {e}")
+
+
 def launch_container_with_repo_mounted(
+    agent_type: str,
     timeout: int = 3600,
     **kwargs,
 ) -> str:
@@ -60,13 +75,13 @@ def launch_container_with_repo_mounted(
     try:
         logger.info(f"Waiting for container to finish (timeout: {timeout}s)")
         result = container.wait(timeout=timeout)
-        logger.info(f"Container exited with status code: {result['StatusCode']}")
+        logger.info(f"Container exited with status code: {result[StatusCode]}")
 
         raw_logs = container.logs(stream=False).decode("utf-8")
         logger.info(f"Raw logs: {raw_logs}")
 
         if result["StatusCode"] != 0:
-            raise Exception(f"Container exited with non-zero status code: {result['StatusCode']}")
+            raise Exception(f"Container exited with non-zero status code: {result[StatusCode]}")
 
         logs = _clean_logs(raw_logs)
         logger.info(f"Clean logs: {logs}")
@@ -80,6 +95,12 @@ def launch_container_with_repo_mounted(
         raise
 
     finally:
+        try:
+            logs = _clean_logs(container.logs(stream=False).decode("utf-8"))
+            _store_container_logs(agent_type, logs)
+        except Exception as e:
+            logger.error(f"Failed to store logs: {e}")
+
         logger.info("Removing all containers")
         for container in docker_client.containers.list(all=True):
             container.stop()
@@ -87,3 +108,4 @@ def launch_container_with_repo_mounted(
         logger.info("Containers removed")
 
     return logs
+
