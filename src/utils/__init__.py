@@ -4,6 +4,7 @@ from .agent_market import (
     get_pr_title,
     remove_all_urls,
 )
+from .cost_tracker import cost_tracker
 from .file_utils import change_directory_ownership_recursive, copy_file_to_directory
 from .git import (
     add_and_commit,
@@ -41,4 +42,5 @@ __all__ = [
     "add_logs_as_pr_comments",
     "add_and_commit",
     "format_messages",
+    "cost_tracker",
 ]
