@@ -5,8 +5,10 @@ from loguru import logger
 
 from src import utils
 from src.config import SETTINGS, Settings
+from src.utils.pricing import PricingStrategy
 
 TIMEOUT = httpx.Timeout(10.0)
+pricing_strategy = PricingStrategy(SETTINGS.openrouter_api_key)
 
 
 async def _create_proposal_for_instance(instance: dict, settings: Settings) -> None:
@@ -17,13 +19,16 @@ async def _create_proposal_for_instance(instance: dict, settings: Settings) -> N
 
     logger.info("Creating proposal for instance id: {}", instance_id)
 
+    bid = pricing_strategy.calculate_next_bid()
+    logger.info(f"Calculated bid for instance {instance_id}: {bid}")
+
     headers = {
         "x-api-key": settings.market_api_key,
         "Accept": "application/json",
     }
     url = f"{settings.market_url}/v1/proposals/create/for-instance/{instance_id}"
     data = {
-        "max_bid": settings.max_bid,
+        "max_bid": bid,
     }
     async with httpx.AsyncClient() as client:
         response = await client.post(url, headers=headers, json=data)

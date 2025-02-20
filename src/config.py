@@ -35,7 +35,14 @@ class Settings(BaseSettings):
         1, description="The code for an awarded proposal in the market."
     )
 
-    max_bid: float = Field(0.01, gt=0, description="The maximum bid for a proposal.")
+    max_bid: float = Field(0.05, gt=0, description="The maximum bid for a proposal.")
+    min_bid: float = Field(0.0, ge=0, description="The minimum bid for a proposal.")
+    backoff_factor: float = Field(
+        0.8, gt=0, lt=1, description="Factor to reduce bid by when not profitable."
+    )
+    increase_factor: float = Field(
+        1.2, gt=1, description="Factor to increase bid by when profitable."
+    )
     agent_type: AgentType = Field(..., description="The type of agent to use.")
 
     openai_api_base: str | None = Field(None, description="The base URL for the OpenAI API.")

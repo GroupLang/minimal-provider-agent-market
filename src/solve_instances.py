@@ -3,7 +3,7 @@ import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
+from typing import Dict, List, Optional
 
 import httpx
 from loguru import logger
@@ -12,8 +12,11 @@ from src import agents, utils
 from src.config import SETTINGS, Settings
 from src.containers import launch_container_with_repo_mounted
 from src.enums import AgentType
+from src.market_scan import pricing_strategy
 
 TIMEOUT = httpx.Timeout(10.0)
+
+DEFAULT_MODEL = "anthropic/claude-3.5-sonnet"
 
 
 @dataclass
@@ -24,6 +27,23 @@ class InstanceToSolve:
     pr_comments: Optional[str] = None
     messages_with_requester: Optional[str] = None
     started_solving: bool = False
+
+
+def fetch_model_prices(openrouter_api_key: str) -> List[Dict]:
+    """Fetch current model prices from OpenRouter API."""
+    try:
+        with httpx.Client() as client:
+            response = client.get(
+                "https://openrouter.ai/api/v1/models",
+                headers={"Authorization": f"Bearer {openrouter_api_key}"},
+            )
+            response.raise_for_status()
+            data = response.json()
+            # OpenRouter API returns data in a 'data' field
+            return data.get("data", [])
+    except Exception as e:
+        logger.error(f"Error fetching model prices: {e}")
+        raise
 
 
 def _get_instance_to_solve(instance_id: str, settings: Settings) -> Optional[InstanceToSolve]:
@@ -97,10 +117,41 @@ def _get_instance_to_solve(instance_id: str, settings: Settings) -> Optional[Ins
         )
 
 
+def estimate_tokens(text: str) -> tuple[int, int]:
+    """Rough estimation of input and output tokens."""
+    input_tokens = len(text) // 4
+    output_tokens = input_tokens * 2
+    return input_tokens, output_tokens
+
+
 def _solve_instance(
     instance_to_solve: InstanceToSolve,
     settings: Settings,
 ) -> None:
+    input_text = instance_to_solve.instance["background"]
+    if instance_to_solve.pr_comments:
+        input_text += "\n" + instance_to_solve.pr_comments
+    if instance_to_solve.messages_with_requester:
+        input_text += "\n" + instance_to_solve.messages_with_requester
+
+    input_tokens, output_tokens = estimate_tokens(input_text)
+
+    estimated_cost = pricing_strategy.estimate_cost(
+        settings.foundation_model_name.value, input_tokens, output_tokens
+    )
+    current_bid = pricing_strategy.calculate_next_bid()
+    was_profitable = current_bid > estimated_cost if estimated_cost > 0 else None
+
+    logger.info(
+        "Instance {} - Estimated cost: {}, Current bid: {}, Profitable: {}",
+        instance_to_solve.instance["id"],
+        estimated_cost,
+        current_bid,
+        was_profitable,
+    )
+
+    pricing_strategy.calculate_next_bid(was_profitable)
+
     logger.info("Solving instance id: {}", instance_to_solve.instance["id"])
     solver_command = utils.build_solver_command(
         instance_to_solve.instance["background"],
@@ -222,6 +273,13 @@ def _send_message(instance_id: str, message: str, settings: Settings) -> None:
 
 def solve_instances_handler() -> None:
     logger.info("Solve instances handler")
+
+    try:
+        models_data = fetch_model_prices(SETTINGS.openrouter_api_key)
+        pricing_strategy.update_model_prices(models_data)
+    except Exception as e:
+        logger.error(f"Failed to fetch model prices: {e}")
+
     awarded_proposals = get_awarded_proposals(SETTINGS)
 
     logger.info(f"Found {len(awarded_proposals)} awarded proposals")
