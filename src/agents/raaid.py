@@ -1,7 +1,8 @@
 import os
 from typing import Any, Dict
 
-from src.enums import ModelName
+from src.enums import ModelName, ProviderType
+from src.utils.cost_tracker import CostTracker
 
 
 def get_container_kwargs(
@@ -28,6 +29,15 @@ def get_container_kwargs(
         "/tmp/aider_cache": {"bind": "/home/ubuntu", "mode": "rw"},
     }
     env_vars = {key: os.getenv(key) for key in os.environ.keys()}
+    # Add cost tracking configuration
+    env_vars.update({
+        "TRACK_API_COSTS": "true",
+        "COST_TRACKER_MODEL": model_name.value,
+        "COST_TRACKER_PROVIDER": model_provider,
+        "COST_TRACKER_EXPERT_MODEL": "o3-mini",
+        "COST_TRACKER_EXPERT_PROVIDER": expert_provider,
+        "COST_TRACKER_AGENT_TYPE": "raaid",
+    })
     user = f"{os.getuid()}:{os.getgid()}"
     kwargs = {
         "image": "aider-raaid",
