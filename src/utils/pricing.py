@@ -19,7 +19,7 @@ class PricingStrategy:
     def __init__(self, openrouter_api_key: str):
         self.openrouter_api_key = openrouter_api_key
         self._model_prices: Dict[str, ModelPricing] = {}
-        self._current_bid: float = 0.01
+        self._current_bid: float = 0.03
         self._backoff_factor: float = 0.8
         self._increase_factor: float = 1.2
         self._min_bid: float = 0.0
@@ -31,8 +31,8 @@ class PricingStrategy:
         self._model_prices.clear()
         for model in models_data:
             self._model_prices[model["id"]] = ModelPricing(
-                input_price_per_token=model.get("pricing", {}).get("input", 0),
-                output_price_per_token=model.get("pricing", {}).get("output", 0),
+                input_price_per_token=model.get("pricing", {}).get("prompt", 0),
+                output_price_per_token=model.get("pricing", {}).get("completion", 0),
             )
         logger.info("Successfully updated model prices")
 
@@ -43,9 +43,8 @@ class PricingStrategy:
             model_id = DEFAULT_MODEL
 
         pricing = self._model_prices[model_id]
-        return (
-            input_tokens * pricing.input_price_per_token
-            + output_tokens * pricing.output_price_per_token
+        return input_tokens * float(pricing.input_price_per_token) + output_tokens * float(
+            pricing.output_price_per_token
         )
 
     def calculate_next_bid(self, was_profitable: Optional[bool] = None) -> float:
@@ -64,5 +63,5 @@ class PricingStrategy:
 
     def reset_strategy(self) -> None:
         """Reset the bidding strategy to initial state."""
-        self._current_bid = 0.01
+        self._current_bid = 0.03
         self._last_profitable = False

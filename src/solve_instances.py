@@ -120,8 +120,7 @@ def _get_instance_to_solve(instance_id: str, settings: Settings) -> Optional[Ins
 def estimate_tokens(text: str) -> tuple[int, int]:
     """Rough estimation of input and output tokens."""
     input_tokens = len(text) // 4
-    output_tokens = input_tokens * 2
-    return input_tokens, output_tokens
+    return input_tokens
 
 
 def _solve_instance(
@@ -134,23 +133,7 @@ def _solve_instance(
     if instance_to_solve.messages_with_requester:
         input_text += "\n" + instance_to_solve.messages_with_requester
 
-    input_tokens, output_tokens = estimate_tokens(input_text)
-
-    estimated_cost = pricing_strategy.estimate_cost(
-        settings.foundation_model_name.value, input_tokens, output_tokens
-    )
-    current_bid = pricing_strategy.calculate_next_bid()
-    was_profitable = current_bid > estimated_cost if estimated_cost > 0 else None
-
-    logger.info(
-        "Instance {} - Estimated cost: {}, Current bid: {}, Profitable: {}",
-        instance_to_solve.instance["id"],
-        estimated_cost,
-        current_bid,
-        was_profitable,
-    )
-
-    pricing_strategy.calculate_next_bid(was_profitable)
+    input_tokens = estimate_tokens(input_text)
 
     logger.info("Solving instance id: {}", instance_to_solve.instance["id"])
     solver_command = utils.build_solver_command(
@@ -203,7 +186,29 @@ def _solve_instance(
                 settings.foundation_model_name,
             )
 
-        logs = launch_container_with_repo_mounted(**container_kwargs)
+        _, raw_logs = launch_container_with_repo_mounted(**container_kwargs)
+
+        if raw_logs:
+            output_tokens = estimate_tokens(raw_logs)
+        else:
+            output_tokens = 0
+
+        estimated_cost = pricing_strategy.estimate_cost(
+            settings.foundation_model_name.value, input_tokens, output_tokens
+        )
+
+        current_bid = pricing_strategy.calculate_next_bid()
+        was_profitable = current_bid > estimated_cost if estimated_cost > 0 else None
+
+        logger.info(
+            "Instance {} - Estimated cost: {}, Current bid: {}, Profitable: {}",
+            instance_to_solve.instance["id"],
+            estimated_cost,
+            current_bid,
+            was_profitable,
+        )
+
+        pricing_strategy.calculate_next_bid(was_profitable)
         if instance_to_solve.pr_url:
             utils.add_logs_as_pr_comments(instance_to_solve.pr_url, settings.github_pat, logs)
 
