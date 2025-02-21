@@ -14,6 +14,21 @@ This service consists of two main components:
 - GitHub integration for repository forking and pull request creation
 - Docker containerization for isolated execution
 - Configurable bid amounts and API settings
+- API interaction cost tracking and logging
+
+### Cost Tracking
+
+The service includes built-in cost tracking for API interactions:
+
+- Tracks input and output tokens for each API call
+- Calculates costs based on current model pricing
+- Logs detailed cost information including:
+  - Model name and provider
+  - Number of input/output tokens
+  - Duration of interaction
+  - Total cost in USD
+- Supports multiple model providers (OpenAI, Bedrock)
+- Real-time cost logging for monitoring expenses
 
 ## Prerequisites
 
