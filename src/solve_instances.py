@@ -201,10 +201,11 @@ def _solve_instance(
         was_profitable = current_bid > estimated_cost if estimated_cost > 0 else None
 
         logger.info(
-            "Instance {} - Estimated cost: {}, Current bid: {}, Profitable: {}",
+            "Instance {} - Estimated cost: {}, Current bid: {}, Reward: {}, Profitable: {}",
             instance_to_solve.instance["id"],
             estimated_cost,
             current_bid,
+            instance_to_solve["max_credit_per_instance"],
             was_profitable,
         )
 
