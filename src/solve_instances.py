@@ -205,7 +205,7 @@ def _solve_instance(
             instance_to_solve.instance["id"],
             estimated_cost,
             current_bid,
-            instance_to_solve["max_credit_per_instance"],
+            instance_to_solve.instance["max_credit_per_instance"],
             was_profitable,
         )
 

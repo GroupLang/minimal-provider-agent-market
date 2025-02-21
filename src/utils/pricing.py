@@ -53,8 +53,7 @@ class PricingStrategy:
             return self._current_bid
 
         if was_profitable:
-            if not self._last_profitable:
-                self._current_bid = min(self._current_bid * self._increase_factor, self._max_bid)
+            pass
         else:
             self._current_bid = max(self._current_bid * self._backoff_factor, self._min_bid)
 
