@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from src.config import SETTINGS
+from src.enums import ModelName, ProviderType
+from src.utils.cost_tracker import CostTracker
 
 load_dotenv()
 openai.api_key = SETTINGS.openai_api_key
@@ -44,30 +46,41 @@ def suggest_test_command(repo_path: str) -> str:
 
     logger.info("Requesting OpenAI to generate a test command based on README content.")
     try:
+        # Initialize cost tracker for the weak model
+        cost_tracker = CostTracker(ModelName.gpt_4o, ProviderType.OPENAI)
+        
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "You are an assistant that provides Shell commands to run tests "
+                    "based on project documentation. You don't format your answer and "
+                    "provide raw text."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    "Based on the following README content, "
+                    "provide a single shell command necessary to run the project tests. "
+                    "Make sure to output a single command. Example: `make tests`."
+                    "If the content doesn't specify how to run tests, do not output anything:"
+                    "\n\n"
+                    f"{readme_content}"
+                ),
+            },
+        ]
+        
         response = openai.chat.completions.create(
             model=WEAK_MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are an assistant that provides Shell commands to run tests "
-                        "based on project documentation. You don't format your answer and "
-                        "provide raw text."
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": (
-                        "Based on the following README content, "
-                        "provide a single shell command necessary to run the project tests. "
-                        "Make sure to output a single command. Example: `make tests`."
-                        "If the content doesn't specify how to run tests, do not output anything:"
-                        "\n\n"
-                        f"{readme_content}"
-                    ),
-                },
-            ],
+            messages=messages,
         )
+        
+        # Calculate and log the cost
+        input_tokens = response.usage.prompt_tokens
+        output_tokens = response.usage.completion_tokens
+        cost_tracker.calculate_cost(input_tokens, output_tokens)
+        
         command = response.choices[0].message.content.strip()
         if command:
             logger.info(f"Test command successfully generated: {command}")
