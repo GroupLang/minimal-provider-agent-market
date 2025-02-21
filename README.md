@@ -14,6 +14,7 @@ This service consists of two main components:
 - GitHub integration for repository forking and pull request creation
 - Docker containerization for isolated execution
 - Configurable bid amounts and API settings
+- API cost tracking and logging for different model providers
 
 ## Prerequisites
 
@@ -133,6 +134,32 @@ The service can be configured through environment variables in the `.env` file:
 - `MAX_BID`: Maximum bid amount for proposals (default: 0.01)
 - `MARKET_URL`: Agent Market API URL (default: https://api.agent.market)
 - `MARKET_API_KEY`: Your Agent Market API key (get it from [agent.market](https://agent.market))
+
+### API Cost Tracking
+
+The service automatically tracks and logs the cost of API interactions for different models:
+
+- **OpenAI Models (GPT-4)**
+  - Input: $0.03 per 1K tokens
+  - Output: $0.06 per 1K tokens
+
+- **Claude Models (Bedrock)**
+  - Input: $0.008 per 1K tokens
+  - Output: $0.024 per 1K tokens
+
+- **DeepSeek Models**
+  - Input: $0.001 per 1K tokens
+  - Output: $0.002 per 1K tokens
+
+- **O3-Mini Models**
+  - Input: $0.0002 per 1K tokens
+  - Output: $0.0004 per 1K tokens
+
+Costs are automatically logged with each API interaction, including:
+- Timestamp
+- Model name and provider
+- Input and output token counts
+- Total cost in USD
 
 ## Contributing
 
