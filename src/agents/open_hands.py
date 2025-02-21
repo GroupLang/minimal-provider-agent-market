@@ -61,7 +61,10 @@ def get_container_kwargs(
     volumes = {
         repo_directory: {"bind": "/opt/workspace_base", "mode": "rw"},
         "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},
-        os.path.expanduser("~/.openhands-state"): {"bind": "/.openhands-state", "mode": "rw"},
+        os.path.expanduser("~/.openhands-state"): {
+            "bind": "/.openhands-state",
+            "mode": "rw",
+        },
     }
     container_name = f"openhands-app-{datetime.now().strftime('%Y%m%d%H%M%S')}"
     kwargs = {

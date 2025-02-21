@@ -7,7 +7,9 @@ from typing import Union
 from loguru import logger
 
 
-def copy_file_to_directory(file_path: Union[Path, str], target_directory: Union[Path, str]) -> None:
+def copy_file_to_directory(
+    file_path: Union[Path, str], target_directory: Union[Path, str]
+) -> None:
     if not os.path.isfile(file_path):
         raise ValueError(f"The file {file_path} does not exist.")
 

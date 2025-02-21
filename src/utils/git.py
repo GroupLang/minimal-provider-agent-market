@@ -28,7 +28,9 @@ def clone_repository(repo_url: str, target_dir: str, github_token: str = None) -
     os.makedirs(target_dir)
 
     if github_token and repo_url.startswith("https://"):
-        auth_url = f"https://{github_token}@github.com/{repo_url.split('github.com/')[-1]}"
+        auth_url = (
+            f"https://{github_token}@github.com/{repo_url.split('github.com/')[-1]}"
+        )
     else:
         auth_url = repo_url
 
@@ -104,7 +106,10 @@ def push_commits(repo_path: str, github_token: str) -> bool:
         repo.remotes.origin.fetch()
 
         remote_branch = f"origin/{current_branch}"
-        if remote_branch in repo.refs and repo.head.commit != repo.refs[remote_branch].commit:
+        if (
+            remote_branch in repo.refs
+            and repo.head.commit != repo.refs[remote_branch].commit
+        ):
             logger.info("There are commits ahead of the remote branch.")
         else:
             logger.info("No new commits to push.")
@@ -134,7 +139,9 @@ def create_pull_request(
         source_repo_name = source_repo_name.removesuffix(".git")
         target_repo_name = target_repo_name.removesuffix(".git")
 
-        logger.info(f"Attempting to create PR from {source_repo_name} to {target_repo_name}")
+        logger.info(
+            f"Attempting to create PR from {source_repo_name} to {target_repo_name}"
+        )
 
         try:
             target_repo = g.get_repo(target_repo_name)
@@ -182,9 +189,7 @@ def create_pull_request(
             )
 
         if not pr_body:
-            pr_body = (
-                "This pull request contains automated changes pushed to the forked repository."
-            )
+            pr_body = "This pull request contains automated changes pushed to the forked repository."
 
         head = f"{source_repo.owner.login}:{current_branch}"
         logger.info(f"Creating PR with head={head} and base={base_branch}")
@@ -292,7 +297,9 @@ def sync_fork_with_upstream(repo_path: str, github_token: str) -> None:
 
         # Format upstream URL with token
         if upstream_url.startswith("https://"):
-            upstream_url = f"https://{github_token}@github.com/{parent_repo.full_name}.git"
+            upstream_url = (
+                f"https://{github_token}@github.com/{parent_repo.full_name}.git"
+            )
             logger.debug("Formatted upstream URL with token")
 
         try:
@@ -319,7 +326,9 @@ def sync_fork_with_upstream(repo_path: str, github_token: str) -> None:
 
         logger.info(f"Merging upstream/{default_branch}")
         repo.git.merge(f"upstream/{default_branch}")
-        logger.info(f"Successfully merged upstream/{default_branch} into local {default_branch}")
+        logger.info(
+            f"Successfully merged upstream/{default_branch} into local {default_branch}"
+        )
 
         # Format origin URL with token
         if origin_url.startswith("https://"):
@@ -364,7 +373,9 @@ def create_and_push_branch(repo_path: str, branch_name: str, github_token: str) 
 
         local_branches = [head.name for head in repo.heads]
         logger.info(f"Local heads are: {local_branches}")
-        remote_branches = [ref.name.split("/")[-1] for ref in repo.remotes.origin.refs if "heads"]
+        remote_branches = [
+            ref.name.split("/")[-1] for ref in repo.remotes.origin.refs if "heads"
+        ]
         logger.info(f"Remote branches are: {remote_branches}")
 
         branch_in_remote = branch_name in remote_branches
@@ -372,7 +383,9 @@ def create_and_push_branch(repo_path: str, branch_name: str, github_token: str) 
         if branch_name in local_branches:
             logger.info(f"Branch '{branch_name}' already exists locally.")
         elif branch_in_remote:
-            logger.info(f"Branch '{branch_name}' exists remotely. Checking it out locally.")
+            logger.info(
+                f"Branch '{branch_name}' exists remotely. Checking it out locally."
+            )
             repo.git.checkout(f"origin/{branch_name}", b=branch_name)
         else:
             logger.info(f"Branch '{branch_name}' does not exist. Creating locally.")
@@ -405,7 +418,9 @@ def create_and_push_branch(repo_path: str, branch_name: str, github_token: str) 
         github_repo = g.get_repo(repo_path)
         logger.info(f"Connected to GitHub repository: {github_repo.full_name}")
 
-        remote_branches = [ref.ref.replace("refs/heads/", "") for ref in github_repo.get_git_refs()]
+        remote_branches = [
+            ref.ref.replace("refs/heads/", "") for ref in github_repo.get_git_refs()
+        ]
         logger.info(f"Remote branches fetched: {remote_branches}")
 
         if branch_name in remote_branches:
@@ -457,7 +472,9 @@ def get_last_pr_comments(pr_url: str, github_token: str) -> str | bool:
         diff_text.append(f"File: {file.filename}")
         diff_text.append(f"Status: {file.status}")
         diff_text.append(f"Changes: +{file.additions} -{file.deletions}")
-        diff_text.append(f"Patch:\n{file.patch if file.patch else 'No patch available'}\n")
+        diff_text.append(
+            f"Patch:\n{file.patch if file.patch else 'No patch available'}\n"
+        )
 
     comments = []
 
@@ -469,7 +486,9 @@ def get_last_pr_comments(pr_url: str, github_token: str) -> str | bool:
 
     review_comments = pr.get_review_comments()
     for comment in review_comments:
-        comments.append(f"Review comment by {comment.user.login} at {comment.created_at}:")
+        comments.append(
+            f"Review comment by {comment.user.login} at {comment.created_at}:"
+        )
         comments.append(f"File: {comment.path}, Line: {comment.line}")
         comments.append(comment.body)
         comments.append("---")
@@ -490,7 +509,9 @@ def build_solver_command(
     background: str, pr_comments: Optional[str], user_messages: Optional[str]
 ) -> str:
     if pr_comments and user_messages:
-        return _build_solver_command_from_pr_and_chat(background, pr_comments, user_messages)
+        return _build_solver_command_from_pr_and_chat(
+            background, pr_comments, user_messages
+        )
 
     if pr_comments:
         return _build_solver_command_from_pr(background, pr_comments)
@@ -660,12 +681,17 @@ async def make_github_request(client, method, url, headers):
 
 async def accept_repo_invitations(pat_token):
     api_url = "https://api.github.com"
-    headers = {"Authorization": f"token {pat_token}", "Accept": "application/vnd.github.v3+json"}
+    headers = {
+        "Authorization": f"token {pat_token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         try:
             invitations_url = f"{api_url}/user/repository_invitations"
-            response = await make_github_request(client, "get", invitations_url, headers)
+            response = await make_github_request(
+                client, "get", invitations_url, headers
+            )
             invitations = response.json()
 
             if not invitations:
@@ -678,9 +704,13 @@ async def accept_repo_invitations(pat_token):
 
                 accept_url = f"{api_url}/user/repository_invitations/{invitation_id}"
                 await make_github_request(client, "patch", accept_url, headers)
-                logger.info(f"Successfully accepted invitation for repository: {repo_name}")
+                logger.info(
+                    f"Successfully accepted invitation for repository: {repo_name}"
+                )
 
         except tenacity.RetryError as e:
-            logger.error(f"Failed after multiple retries: {str(e.last_attempt.exception())}")
+            logger.error(
+                f"Failed after multiple retries: {str(e.last_attempt.exception())}"
+            )
         except httpx.RequestError as e:
             logger.error(f"Unrecoverable error occurred: {str(e)}")
