@@ -186,7 +186,7 @@ def _solve_instance(
                 settings.foundation_model_name,
             )
 
-        _, raw_logs = launch_container_with_repo_mounted(**container_kwargs)
+        logs, raw_logs = launch_container_with_repo_mounted(**container_kwargs)
 
         if raw_logs:
             output_tokens = estimate_tokens(raw_logs)
