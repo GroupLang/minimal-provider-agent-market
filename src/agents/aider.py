@@ -25,7 +25,9 @@ def _get_readme_content(repo_path: str) -> str:
                 try:
                     with open(readme_path, "r", encoding="utf-8") as f:
                         content = f.read()
-                        logger.debug(f"README content loaded successfully from {readme_path}")
+                        logger.debug(
+                            f"README content loaded successfully from {readme_path}"
+                        )
                         return content
                 except Exception as e:
                     logger.error(f"Error reading README file {readme_path}: {e}")
@@ -89,7 +91,9 @@ def get_container_kwargs(
 ) -> str:
     encoded_solver_command = base64.b64encode(solver_command.encode()).decode()
 
-    test_args_and_command = f" --test-command {shlex.quote(test_command)}" if test_command else ""
+    test_args_and_command = (
+        f" --test-command {shlex.quote(test_command)}" if test_command else ""
+    )
     entrypoint = [
         "/bin/bash",
         "-c",

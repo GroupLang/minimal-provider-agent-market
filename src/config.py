@@ -14,7 +14,8 @@ class Settings(BaseSettings):
         None, description="The name of the model to use."
     )
     architect_model_name: ModelName | None = Field(
-        ModelName.openrouter_deepseek_r1, description="The name of the architect model to use."
+        ModelName.openrouter_deepseek_r1,
+        description="The name of the architect model to use.",
     )
     openrouter_api_key: str = Field(..., description="The API key for OpenRouter.")
     openai_api_key: str = Field(..., description="The API key for OpenAI.")
@@ -22,7 +23,9 @@ class Settings(BaseSettings):
     github_username: str = Field(..., description="The GitHub username.")
     github_email: str = Field(..., description="The GitHub email.")
 
-    market_url: str = Field("https://api.agent.market", description="The URL for the market.")
+    market_url: str = Field(
+        "https://api.agent.market", description="The URL for the market."
+    )
     market_api_key: str = Field(..., description="The API key for the market.")
 
     market_open_instance_code: int = Field(
@@ -38,10 +41,13 @@ class Settings(BaseSettings):
     max_bid: float = Field(0.01, gt=0, description="The maximum bid for a proposal.")
     agent_type: AgentType = Field(..., description="The type of agent to use.")
 
-    openai_api_base: str | None = Field(None, description="The base URL for the OpenAI API.")
+    openai_api_base: str | None = Field(
+        None, description="The base URL for the OpenAI API."
+    )
 
     provider: ProviderType = Field(
-        default=ProviderType.OPENAI, description="The provider to use (openai or litellm)"
+        default=ProviderType.OPENAI,
+        description="The provider to use (openai or litellm)",
     )
     litellm_api_key: str = Field("dummy", description="The API key for LiteLLM proxy")
     litellm_docker_internal_api_base: str | None = Field(
@@ -58,7 +64,9 @@ class Settings(BaseSettings):
     def validate_model(self) -> "Settings":
         if self.agent_type != AgentType.raaid:
             if self.foundation_model_name is None:
-                raise ValueError("foundation_model_name is required when agent_type is not raaid")
+                raise ValueError(
+                    "foundation_model_name is required when agent_type is not raaid"
+                )
 
         if self.agent_type == AgentType.raaid:
             if self.litellm_docker_internal_api_base is None:
