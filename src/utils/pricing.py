@@ -19,11 +19,11 @@ class PricingStrategy:
     def __init__(self, openrouter_api_key: str):
         self.openrouter_api_key = openrouter_api_key
         self._model_prices: Dict[str, ModelPricing] = {}
-        self._current_bid: float = 1
+        self._current_bid: float = 0.03
         self._backoff_factor: float = 0.8
         self._increase_factor: float = 1.2
-        self._min_bid: float = 0.0
-        self._max_bid: float = 0.05
+        self._min_bid: float = 0.03
+        self._max_bid: float = 0.03
         self._last_profitable: bool = False
 
     def update_model_prices(self, models_data: list) -> None:
@@ -58,7 +58,7 @@ class PricingStrategy:
             self._current_bid = max(self._current_bid * self._backoff_factor, self._min_bid)
 
         self._last_profitable = was_profitable
-        return round(self._current_bid, 2)
+        return round(self._min_bid, 2)
 
     def reset_strategy(self) -> None:
         """Reset the bidding strategy to initial state."""
