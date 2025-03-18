@@ -86,4 +86,4 @@ def launch_container_with_repo_mounted(
             container.remove()
         logger.info("Containers removed")
 
-    return logs
+    return logs, raw_logs
