@@ -18,8 +18,8 @@ _MODEL_ALIAS_TO_MODEL: dict[ModelName, dict[ProviderType, str]] = {
     },
 }
 
-_DOCKER_IMAGE = "docker.all-hands.dev/all-hands-ai/openhands:0.18"
-_RUNTIME_IMAGE = "docker.all-hands.dev/all-hands-ai/runtime:0.18-nikolaik"
+_DOCKER_IMAGE = "docker.all-hands.dev/all-hands-ai/openhands:0.28"
+_RUNTIME_IMAGE = "docker.all-hands.dev/all-hands-ai/runtime:0.28-nikolaik"
 _DOCKER_NETWORK_HOST = ["host.docker.internal:host-gateway"]
 _PROVIDER_CONFIGS: dict[ProviderType, dict[str, str]] = {
     ProviderType.LITELLM: {

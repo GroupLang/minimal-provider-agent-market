@@ -1,10 +1,13 @@
 model_list:
   - model_name: bedrock-claude-v2
     litellm_params:
-      model: bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0
+      model: bedrock/us.anthropic.claude-3-7-sonnet-20250219-v1:0
       aws_access_key_id: os.environ/CUSTOM_AWS_ACCESS_KEY_ID
       aws_secret_access_key: os.environ/CUSTOM_AWS_SECRET_ACCESS_KEY
       aws_region_name: os.environ/CUSTOM_AWS_REGION_NAME
+      temperature: 1
+      max_tokens: 64000
+      thinking: {"type": "enabled", "budget_tokens": 32000}
   - model_name: gpt-4o-2024-08-06
     litellm_params:
       model: bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0
