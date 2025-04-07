@@ -54,7 +54,16 @@ def add_and_commit(repo_path: str) -> None:
         if repo.is_dirty(untracked_files=True):
             logger.info("Repository is dirty. Staging changes except aider files.")
 
-            changed_files = [item.a_path for item in repo.index.diff(None)]
+            # Get all changes including modified, deleted, and untracked files
+            changed_files = []
+            for item in repo.index.diff(None):
+                if item.deleted_file:
+                    # Handle deleted files
+                    changed_files.append(item.a_path)
+                    repo.index.remove([item.a_path])
+                else:
+                    changed_files.append(item.a_path)
+            
             untracked_files = repo.untracked_files
             all_files = changed_files + untracked_files
 
@@ -65,7 +74,8 @@ def add_and_commit(repo_path: str) -> None:
             ]
 
             if files_to_stage:
-                repo.index.add(files_to_stage)
+                # Stage modified and new files
+                repo.index.add([f for f in files_to_stage if f in untracked_files or f in changed_files])
                 logger.info("Changes staged successfully (excluding aider files).")
 
                 commit_message = generate_commit_message(repo_path)
