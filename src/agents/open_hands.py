@@ -50,7 +50,7 @@ def get_container_kwargs(
         "GITHUB_TOKEN": SETTINGS.github_pat,
         "GITHUB_USERNAME": SETTINGS.github_username,
         "GITHUB_EMAIL": SETTINGS.github_email,
-        "AWS_REGION": SETTINGS.aws_region_name,
+        "AWS_REGION_NAME": SETTINGS.aws_region_name,
         "AWS_ACCESS_KEY_ID": SETTINGS.aws_access_key_id,
         "AWS_SECRET_ACCESS_KEY": SETTINGS.aws_secret_access_key,
         "WORKSPACE_MOUNT_PATH": repo_directory,
