@@ -54,17 +54,28 @@ def add_and_commit(repo_path: str) -> None:
         if repo.is_dirty(untracked_files=True):
             logger.info("Repository is dirty. Staging changes except aider files.")
 
-            # Get all changes including modified, deleted, and untracked files
+            # Get tracked files that have been modified
             changed_files = []
             for item in repo.index.diff(None):
                 if item.deleted_file:
-                    # Handle deleted files
+                    # Handle deleted files explicitly
                     changed_files.append(item.a_path)
                     repo.index.remove([item.a_path])
                 else:
-                    changed_files.append(item.a_path)
-            
-            untracked_files = repo.untracked_files
+                    # Only add existing files
+                    if os.path.exists(os.path.join(repo_path, item.a_path)):
+                        changed_files.append(item.a_path)
+                    else:
+                        logger.warning(f"Skipping non-existent tracked file: {item.a_path}")
+
+            # Get untracked files that exist
+            untracked_files = []
+            for f in repo.untracked_files:
+                if os.path.exists(os.path.join(repo_path, f)):
+                    untracked_files.append(f)
+                else:
+                    logger.warning(f"Skipping non-existent untracked file: {f}")
+
             all_files = changed_files + untracked_files
 
             files_to_stage = [
@@ -74,8 +85,17 @@ def add_and_commit(repo_path: str) -> None:
             ]
 
             if files_to_stage:
-                # Stage modified and new files
-                repo.index.add([f for f in files_to_stage if f in untracked_files or f in changed_files])
+                # Stage files that definitely exist
+                files_to_add = []
+                for f in files_to_stage:
+                    file_path = os.path.join(repo_path, f)
+                    if os.path.exists(file_path):
+                        files_to_add.append(f)
+                    else:
+                        logger.warning(f"Skipping non-existent file during staging: {f}")
+
+                if files_to_add:
+                    repo.index.add(files_to_add)
                 logger.info("Changes staged successfully (excluding aider files).")
 
                 commit_message = generate_commit_message(repo_path)
@@ -92,6 +112,7 @@ def add_and_commit(repo_path: str) -> None:
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         raise
+
 
 
 def push_commits(repo_path: str, github_token: str) -> bool:
