@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     github_username: str = Field(..., description="The GitHub username.")
     github_email: str = Field(..., description="The GitHub email.")
 
+    aws_region: str = Field(..., description="The AWS region to use for the Lambda function.")    
+    aws_access_key_id: str = Field(..., description="The AWS access key ID.")
+    aws_secret_access_key: str = Field(..., description="The AWS secret access key.")
+
     market_url: str = Field("https://api.agent.market", description="The URL for the market.")
     market_api_key: str = Field(..., description="The API key for the market.")
 

@@ -540,7 +540,12 @@ def _build_solver_command_from_instance_background(background: str) -> str:
             "changes. Your task is to analyze the issue description and specifically address "
             "the conversation with the user. Focus only on implementing changes requested in "
             "the conversation with the user. Ensure your changes maintain code quality and "
-            "follow the project's standards",
+            "follow the project's standards. If the project is a frontend app or FastAPI backend, "
+            "you must create a deploy.sh file that handles deployment using AWS credentials "
+            "(AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment "
+            "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
+            "set up AWS ECS deployment. After creating the deploy script, execute it to perform "
+            "the initial deployment if AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -548,6 +553,10 @@ def _build_solver_command_from_instance_background(background: str) -> str:
             "1. Review the issue description to understand the context",
             "2. Implement the necessary code changes to solve the issue",
             "3. Ensure your changes maintain code quality and follow the project's standards",
+            "4. If the project is a frontend app or FastAPI backend:",
+            "   a. Create deploy.sh with AWS S3 configuration for frontend or AWS ECS for FastAPI",
+            "   b. Verify AWS credentials (AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME)",
+            "   c. Execute deploy.sh for initial deployment if credentials are available",
         ]
     )
     return result
@@ -563,7 +572,12 @@ def _build_solver_command_from_pr_and_chat(
             "changes based on feedback provided via a pull request or a chat. Your task is to "
             "analyze the issue description and specifically address the LAST comment in the "
             "pull request. Focus only on implementing changes requested in the most recent "
-            "comment.",
+            "comment. If the project is a frontend app or FastAPI backend, you must create a "
+            "deploy.sh file that handles deployment using AWS credentials (AWS_SECRET_ACCESS_KEY, "
+            "AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment variables. For frontend "
+            "apps, configure AWS S3 website hosting. For FastAPI, set up AWS ECS deployment. "
+            "After creating the deploy script, execute it to perform the initial deployment if AWS "
+            "credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -578,6 +592,10 @@ def _build_solver_command_from_pr_and_chat(
             "4. Implement the necessary code changes addressing the feedback in the last comment "
             "of the PR and the conversation with the user",
             "5. Ensure your changes maintain code quality and follow the project's standards",
+            "6. If the project is a frontend app or FastAPI backend:",
+            "   a. Create deploy.sh with AWS S3 configuration for frontend or AWS ECS for FastAPI",
+            "   b. Verify AWS credentials (AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME)",
+            "   c. Execute deploy.sh for initial deployment if credentials are available",
         ]
     )
     return result
@@ -591,7 +609,12 @@ def _build_solver_command_from_pr(background: str, pr_comments: str) -> str:
             "changes. Your task is to analyze the issue description and specifically address "
             "the last comment in the pull request. Focus only on implementing changes requested "
             "in the most recent comment. Ensure your changes maintain code quality and follow "
-            "the project's standards",
+            "the project's standards. If the project is a frontend app or FastAPI backend, you "
+            "must create a deploy.sh file that handles deployment using AWS credentials "
+            "(AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment "
+            "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
+            "set up AWS ECS deployment. After creating the deploy script, execute it to perform "
+            "the initial deployment if AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -603,6 +626,10 @@ def _build_solver_command_from_pr(background: str, pr_comments: str) -> str:
             "3. Implement the necessary code changes addressing the feedback in the last comment "
             "of the PR",
             "4. Ensure your changes maintain code quality and follow the project's standards",
+            "5. If the project is a frontend app or FastAPI backend:",
+            "   a. Create deploy.sh with AWS S3 configuration for frontend or AWS ECS for FastAPI",
+            "   b. Verify AWS credentials (AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME)",
+            "   c. Execute deploy.sh for initial deployment if credentials are available",
         ]
     )
     return result
@@ -616,7 +643,12 @@ def _build_solver_command_from_chat(background: str, user_messages: str) -> str:
             "changes. Your task is to analyze the issue description and specifically address the "
             "conversation with the user. Focus only on implementing changes requested in the "
             "conversation with the user. Ensure your changes maintain code quality and follow the "
-            "project's standards",
+            "project's standards. If the project is a frontend app or FastAPI backend, you must "
+            "create a deploy.sh file that handles deployment using AWS credentials "
+            "(AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment "
+            "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
+            "set up AWS ECS deployment. After creating the deploy script, execute it to perform "
+            "the initial deployment if AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -628,6 +660,10 @@ def _build_solver_command_from_chat(background: str, user_messages: str) -> str:
             "3. Implement the necessary code changes addressing the feedback in the conversation "
             "with the user",
             "4. Ensure your changes maintain code quality and follow the project's standards",
+            "5. If the project is a frontend app or FastAPI backend:",
+            "   a. Create deploy.sh with AWS S3 configuration for frontend or AWS ECS for FastAPI",
+            "   b. Verify AWS credentials (AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME)",
+            "   c. Execute deploy.sh for initial deployment if credentials are available",
         ]
     )
     return result
