@@ -548,9 +548,11 @@ def _build_solver_command_from_instance_background(background: str) -> str:
             "resource address (the CloudFront URL for frontend or API endpoint URL for FastAPI) "
             "as its last line. You MUST test the deploy.sh script thoroughly and ensure it works "
             "correctly. If any issues arise during deployment, you MUST debug and fix them until "
-            "the deployment process works flawlessly. Do not consider the task complete until "
-            "deploy.sh has been successfully executed and the deployment is verified working. "
-            "Execute the script using the command 'bash deploy.sh' to perform the initial deployment if AWS credentials are available.",
+            "the deployment process works flawlessly. Note that you do not need to make deploy.sh "
+            "executable with chmod +x as you will use 'bash deploy.sh' to run it. Do not consider "
+            "the task complete until deploy.sh has been successfully executed and the deployment "
+            "is verified working. Execute the script using the command 'bash deploy.sh' to perform "
+            "the initial deployment if AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -585,9 +587,10 @@ def _build_solver_command_from_pr_and_chat(
             "for frontend or API endpoint URL for FastAPI) as its last line. You MUST test the "
             "deploy.sh script thoroughly and ensure it works correctly. If any issues arise during "
             "deployment, you MUST debug and fix them until the deployment process works flawlessly. "
-            "Do not consider the task complete until deploy.sh has been successfully executed and "
-            "the deployment is verified working. Execute the script using the command 'bash deploy.sh' "
-            "to perform the initial deployment if AWS credentials are available.",
+            "Note that you do not need to make deploy.sh executable with chmod +x as you will use "
+            "'bash deploy.sh' to run it. Do not consider the task complete until deploy.sh has been "
+            "successfully executed and the deployment is verified working. Execute the script using "
+            "the command 'bash deploy.sh' to perform the initial deployment if AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -627,9 +630,11 @@ def _build_solver_command_from_pr(background: str, pr_comments: str) -> str:
             "resource address (the CloudFront URL for frontend or API endpoint URL for FastAPI) "
             "as its last line. You MUST test the deploy.sh script thoroughly and ensure it works "
             "correctly. If any issues arise during deployment, you MUST debug and fix them until "
-            "the deployment process works flawlessly. Do not consider the task complete until "
-            "deploy.sh has been successfully executed and the deployment is verified working. "
-            "Execute the script using the command 'bash deploy.sh' to perform the initial deployment if AWS credentials are available.",
+            "the deployment process works flawlessly. Note that you do not need to make deploy.sh "
+            "executable with chmod +x as you will use 'bash deploy.sh' to run it. Do not consider "
+            "the task complete until deploy.sh has been successfully executed and the deployment "
+            "is verified working. Execute the script using the command 'bash deploy.sh' to perform "
+            "the initial deployment if AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -666,9 +671,11 @@ def _build_solver_command_from_chat(background: str, user_messages: str) -> str:
             "resource address (the CloudFront URL for frontend or API endpoint URL for FastAPI) "
             "as its last line. You MUST test the deploy.sh script thoroughly and ensure it works "
             "correctly. If any issues arise during deployment, you MUST debug and fix them until "
-            "the deployment process works flawlessly. Do not consider the task complete until "
-            "deploy.sh has been successfully executed and the deployment is verified working. "
-            "Execute the script using the command 'bash deploy.sh' to perform the initial deployment if AWS credentials are available.",
+            "the deployment process works flawlessly. Note that you do not need to make deploy.sh "
+            "executable with chmod +x as you will use 'bash deploy.sh' to run it. Do not consider "
+            "the task complete until deploy.sh has been successfully executed and the deployment "
+            "is verified working. Execute the script using the command 'bash deploy.sh' to perform "
+            "the initial deployment if AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
