@@ -546,8 +546,11 @@ def _build_solver_command_from_instance_background(background: str) -> str:
             "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
             "set up AWS ECS deployment. After creating the deploy script, ensure it prints the "
             "resource address (the CloudFront URL for frontend or API endpoint URL for FastAPI) "
-            "as its last line. Then execute the script to perform the initial deployment if AWS "
-            "credentials are available.",
+            "as its last line. You MUST test the deploy.sh script thoroughly and ensure it works "
+            "correctly. If any issues arise during deployment, you MUST debug and fix them until "
+            "the deployment process works flawlessly. Do not consider the task complete until "
+            "deploy.sh has been successfully executed and the deployment is verified working. "
+            "Execute the script to perform the initial deployment if AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -579,8 +582,12 @@ def _build_solver_command_from_pr_and_chat(
             "AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment variables. For frontend "
             "apps, configure AWS S3 website hosting. For FastAPI, set up AWS ECS deployment. "
             "After creating the deploy script, ensure it prints the resource address (the CloudFront URL "
-            "for frontend or API endpoint URL for FastAPI) as its last line. Then execute the script "
-            "to perform the initial deployment if AWS credentials are available.",
+            "for frontend or API endpoint URL for FastAPI) as its last line. You MUST test the "
+            "deploy.sh script thoroughly and ensure it works correctly. If any issues arise during "
+            "deployment, you MUST debug and fix them until the deployment process works flawlessly. "
+            "Do not consider the task complete until deploy.sh has been successfully executed and "
+            "the deployment is verified working. Execute the script to perform the initial deployment "
+            "if AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -618,8 +625,11 @@ def _build_solver_command_from_pr(background: str, pr_comments: str) -> str:
             "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
             "set up AWS ECS deployment. After creating the deploy script, ensure it prints the "
             "resource address (the CloudFront URL for frontend or API endpoint URL for FastAPI) "
-            "as its last line. Then execute the script to perform the initial deployment if AWS "
-            "credentials are available.",
+            "as its last line. You MUST test the deploy.sh script thoroughly and ensure it works "
+            "correctly. If any issues arise during deployment, you MUST debug and fix them until "
+            "the deployment process works flawlessly. Do not consider the task complete until "
+            "deploy.sh has been successfully executed and the deployment is verified working. "
+            "Execute the script to perform the initial deployment if AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -652,8 +662,13 @@ def _build_solver_command_from_chat(background: str, user_messages: str) -> str:
             "create a deploy.sh file that handles deployment using AWS credentials "
             "(AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment "
             "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
-            "set up AWS ECS deployment. After creating the deploy script, execute it to perform "
-            "the initial deployment if AWS credentials are available.",
+            "set up AWS ECS deployment. After creating the deploy script, ensure it prints the "
+            "resource address (the CloudFront URL for frontend or API endpoint URL for FastAPI) "
+            "as its last line. You MUST test the deploy.sh script thoroughly and ensure it works "
+            "correctly. If any issues arise during deployment, you MUST debug and fix them until "
+            "the deployment process works flawlessly. Do not consider the task complete until "
+            "deploy.sh has been successfully executed and the deployment is verified working. "
+            "Execute the script to perform the initial deployment if AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
