@@ -544,8 +544,10 @@ def _build_solver_command_from_instance_background(background: str) -> str:
             "you must create a deploy.sh file that handles deployment using AWS credentials "
             "(AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment "
             "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
-            "set up AWS ECS deployment. After creating the deploy script, execute it to perform "
-            "the initial deployment if AWS credentials are available.",
+            "set up AWS ECS deployment. After creating the deploy script, ensure it prints the "
+            "resource address (the CloudFront URL for frontend or API endpoint URL for FastAPI) "
+            "as its last line. Then execute the script to perform the initial deployment if AWS "
+            "credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -576,8 +578,9 @@ def _build_solver_command_from_pr_and_chat(
             "deploy.sh file that handles deployment using AWS credentials (AWS_SECRET_ACCESS_KEY, "
             "AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment variables. For frontend "
             "apps, configure AWS S3 website hosting. For FastAPI, set up AWS ECS deployment. "
-            "After creating the deploy script, execute it to perform the initial deployment if AWS "
-            "credentials are available.",
+            "After creating the deploy script, ensure it prints the resource address (the CloudFront URL "
+            "for frontend or API endpoint URL for FastAPI) as its last line. Then execute the script "
+            "to perform the initial deployment if AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -613,8 +616,10 @@ def _build_solver_command_from_pr(background: str, pr_comments: str) -> str:
             "must create a deploy.sh file that handles deployment using AWS credentials "
             "(AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment "
             "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
-            "set up AWS ECS deployment. After creating the deploy script, execute it to perform "
-            "the initial deployment if AWS credentials are available.",
+            "set up AWS ECS deployment. After creating the deploy script, ensure it prints the "
+            "resource address (the CloudFront URL for frontend or API endpoint URL for FastAPI) "
+            "as its last line. Then execute the script to perform the initial deployment if AWS "
+            "credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
