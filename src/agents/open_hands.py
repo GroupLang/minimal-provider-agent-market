@@ -74,5 +74,6 @@ def get_container_kwargs(
         "volumes": volumes,
         "name": container_name,
         "extra_hosts": _DOCKER_NETWORK_HOST,
+        "user": f"{os.getuid()}:{os.getgid()}",  # Set user:group permissions
     }
     return kwargs
