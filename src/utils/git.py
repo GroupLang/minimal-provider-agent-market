@@ -540,22 +540,11 @@ def _build_solver_command_from_instance_background(background: str) -> str:
             "changes. Your task is to analyze the issue description and specifically address "
             "the conversation with the user. Focus only on implementing changes requested in "
             "the conversation with the user. Ensure your changes maintain code quality and "
-            "follow the project's standards. If the project is a frontend app or FastAPI backend, "
-            "you must create a deploy.sh file that handles deployment using AWS credentials "
-            "(AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment "
-            "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
-            "set up AWS ECS deployment. After creating the deploy script, ensure it prints the "
-            "resource address (the CloudFront URL for frontend or API endpoint URL for FastAPI) "
-            "as its last line. You MUST test the deploy.sh script thoroughly and ensure it works "
-            "correctly. If any issues arise during deployment, you MUST debug and fix them until "
-            "the deployment process works flawlessly. Note that you do not need to make deploy.sh "
-            "executable with chmod +x as you will use 'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY "
-            "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' "
-            "to run it. Do not consider the task complete until deploy.sh has been successfully "
-            "executed and the deployment is verified working. Execute the script using the command "
-            "'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID "
-            "AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' to perform the initial deployment if "
-            "AWS credentials are available.",
+            "follow the project's standards. If the project is a frontend app, you MUST continue "
+            "working until the build folder is successfully created - do not stop or complete the task "
+            "until the build folder exists. Include the build folder in your changes and exclude the "
+            "node_modules directory. If the project "
+            "is a backend application, use FastAPI Python framework for implementing the API endpoints.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -563,10 +552,14 @@ def _build_solver_command_from_instance_background(background: str) -> str:
             "1. Review the issue description to understand the context",
             "2. Implement the necessary code changes to solve the issue",
             "3. Ensure your changes maintain code quality and follow the project's standards",
-            "4. If the project is a frontend app or FastAPI backend:",
-            "   a. Create deploy.sh with AWS S3 configuration for frontend or AWS ECS for FastAPI",
-            "   b. Verify AWS credentials (AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME)",
-            "   c. Execute deploy.sh for initial deployment if credentials are available",
+            "4. If the project is a frontend app:",
+            "   a. Continue working until the build folder is successfully created",
+            "   b. Do not stop or complete the task until the build folder exists",
+            "   c. Include the build folder in your changes",
+            "   d. Exclude the node_modules directory",
+            "5. If the project is a backend application:",
+            "   a. Use FastAPI Python framework for API endpoints",
+            "   b. Follow FastAPI best practices and conventions",
         ]
     )
     return result
@@ -582,20 +575,11 @@ def _build_solver_command_from_pr_and_chat(
             "changes based on feedback provided via a pull request or a chat. Your task is to "
             "analyze the issue description and specifically address the LAST comment in the "
             "pull request. Focus only on implementing changes requested in the most recent "
-            "comment. If the project is a frontend app or FastAPI backend, you must create a "
-            "deploy.sh file that handles deployment using AWS credentials (AWS_SECRET_ACCESS_KEY, "
-            "AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment variables. For frontend "
-            "apps, configure AWS S3 website hosting. For FastAPI, set up AWS ECS deployment. "
-            "After creating the deploy script, ensure it prints the resource address (the CloudFront URL "
-            "for frontend or API endpoint URL for FastAPI) as its last line. You MUST test the "
-            "deploy.sh script thoroughly and ensure it works correctly. If any issues arise during "
-            "deployment, you MUST debug and fix them until the deployment process works flawlessly. "
-            "Note that you do not need to make deploy.sh executable with chmod +x as you will use "
-            "'bash deploy.sh' to run it. The AWS credentials (AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, "
-            "AWS_REGION_NAME) are already available as environment variables in the container. Do not "
-            "consider the task complete until deploy.sh has been successfully executed and the deployment "
-            "is verified working. Execute the script using the command 'bash deploy.sh' to perform the "
-            "initial deployment if AWS credentials are available.",
+            "comment. If the project is a frontend app, you MUST continue working until the "
+            "build folder is successfully created - do not stop or complete the task until "
+            "the build folder exists. Include the build folder in your changes and exclude "
+            "the node_modules directory. If the project "
+            "is a backend application, use FastAPI Python framework for implementing the API endpoints.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -610,10 +594,14 @@ def _build_solver_command_from_pr_and_chat(
             "4. Implement the necessary code changes addressing the feedback in the last comment "
             "of the PR and the conversation with the user",
             "5. Ensure your changes maintain code quality and follow the project's standards",
-            "6. If the project is a frontend app or FastAPI backend:",
-            "   a. Create deploy.sh with AWS S3 configuration for frontend or AWS ECS for FastAPI",
-            "   b. Verify AWS credentials (AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME)",
-            "   c. Execute deploy.sh for initial deployment if credentials are available",
+            "6. If the project is a frontend app:",
+            "   a. Continue working until the build folder is successfully created",
+            "   b. Do not stop or complete the task until the build folder exists",
+            "   c. Include the build folder in your changes",
+            "   d. Exclude the node_modules directory",
+            "7. If the project is a backend application:",
+            "   a. Use FastAPI Python framework for API endpoints",
+            "   b. Follow FastAPI best practices and conventions",
         ]
     )
     return result
@@ -627,22 +615,11 @@ def _build_solver_command_from_pr(background: str, pr_comments: str) -> str:
             "changes. Your task is to analyze the issue description and specifically address "
             "the last comment in the pull request. Focus only on implementing changes requested "
             "in the most recent comment. Ensure your changes maintain code quality and follow "
-            "the project's standards. If the project is a frontend app or FastAPI backend, you "
-            "must create a deploy.sh file that handles deployment using AWS credentials "
-            "(AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment "
-            "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
-            "set up AWS ECS deployment. After creating the deploy script, ensure it prints the "
-            "resource address (the CloudFront URL for frontend or API endpoint URL for FastAPI) "
-            "as its last line. You MUST test the deploy.sh script thoroughly and ensure it works "
-            "correctly. If any issues arise during deployment, you MUST debug and fix them until "
-            "the deployment process works flawlessly. Note that you do not need to make deploy.sh "
-            "executable with chmod +x as you will use 'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY "
-            "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' "
-            "to run it. Do not consider the task complete until deploy.sh has been successfully "
-            "executed and the deployment is verified working. Execute the script using the command "
-            "'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID "
-            "AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' to perform the initial deployment if "
-            "AWS credentials are available.",
+            "the project's standards. If the project is a frontend app, you MUST continue "
+            "working until the build folder is successfully created - do not stop or complete the task "
+            "until the build folder exists. Include the build folder in your changes and exclude the "
+            "node_modules directory. If the project "
+            "is a backend application, use FastAPI Python framework for implementing the API endpoints.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -654,10 +631,14 @@ def _build_solver_command_from_pr(background: str, pr_comments: str) -> str:
             "3. Implement the necessary code changes addressing the feedback in the last comment "
             "of the PR",
             "4. Ensure your changes maintain code quality and follow the project's standards",
-            "5. If the project is a frontend app or FastAPI backend:",
-            "   a. Create deploy.sh with AWS S3 configuration for frontend or AWS ECS for FastAPI",
-            "   b. Verify AWS credentials (AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME)",
-            "   c. Execute deploy.sh for initial deployment if credentials are available",
+            "5. If the project is a frontend app:",
+            "   a. Continue working until the build folder is successfully created",
+            "   b. Do not stop or complete the task until the build folder exists",
+            "   c. Include the build folder in your changes",
+            "   d. Exclude the node_modules directory",
+            "6. If the project is a backend application:",
+            "   a. Use FastAPI Python framework for API endpoints",
+            "   b. Follow FastAPI best practices and conventions",
         ]
     )
     return result
@@ -671,22 +652,11 @@ def _build_solver_command_from_chat(background: str, user_messages: str) -> str:
             "changes. Your task is to analyze the issue description and specifically address the "
             "conversation with the user. Focus only on implementing changes requested in the "
             "conversation with the user. Ensure your changes maintain code quality and follow the "
-            "project's standards. If the project is a frontend app or FastAPI backend, you must "
-            "create a deploy.sh file that handles deployment using AWS credentials "
-            "(AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment "
-            "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
-            "set up AWS ECS deployment. After creating the deploy script, ensure it prints the "
-            "resource address (the CloudFront URL for frontend or API endpoint URL for FastAPI) "
-            "as its last line. You MUST test the deploy.sh script thoroughly and ensure it works "
-            "correctly. If any issues arise during deployment, you MUST debug and fix them until "
-            "the deployment process works flawlessly. Note that you do not need to make deploy.sh "
-            "executable with chmod +x as you will use 'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY "
-            "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' "
-            "to run it. Do not consider the task complete until deploy.sh has been successfully "
-            "executed and the deployment is verified working. Execute the script using the command "
-            "'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID "
-            "AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' to perform the initial deployment if "
-            "AWS credentials are available.",
+            "project's standards. If the project is a frontend app, you MUST continue "
+            "working until the build folder is successfully created - do not stop or complete the task "
+            "until the build folder exists. Include the build folder in your changes and exclude the "
+            "node_modules directory. If the project "
+            "is a backend application, use FastAPI Python framework for implementing the API endpoints.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -698,10 +668,14 @@ def _build_solver_command_from_chat(background: str, user_messages: str) -> str:
             "3. Implement the necessary code changes addressing the feedback in the conversation "
             "with the user",
             "4. Ensure your changes maintain code quality and follow the project's standards",
-            "5. If the project is a frontend app or FastAPI backend:",
-            "   a. Create deploy.sh with AWS S3 configuration for frontend or AWS ECS for FastAPI",
-            "   b. Verify AWS credentials (AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME)",
-            "   c. Execute deploy.sh for initial deployment if credentials are available",
+            "5. If the project is a frontend app:",
+            "   a. Continue working until the build folder is successfully created",
+            "   b. Do not stop or complete the task until the build folder exists",
+            "   c. Include the build folder in your changes",
+            "   d. Exclude the node_modules directory",
+            "6. If the project is a backend application:",
+            "   a. Use FastAPI Python framework for API endpoints",
+            "   b. Follow FastAPI best practices and conventions",
         ]
     )
     return result
