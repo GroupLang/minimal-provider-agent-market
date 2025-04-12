@@ -549,10 +549,13 @@ def _build_solver_command_from_instance_background(background: str) -> str:
             "as its last line. You MUST test the deploy.sh script thoroughly and ensure it works "
             "correctly. If any issues arise during deployment, you MUST debug and fix them until "
             "the deployment process works flawlessly. Note that you do not need to make deploy.sh "
-            "executable with chmod +x as you will use 'bash deploy.sh' to run it. Do not consider "
-            "the task complete until deploy.sh has been successfully executed and the deployment "
-            "is verified working. Execute the script using the command 'bash deploy.sh' to perform "
-            "the initial deployment if AWS credentials are available.",
+            "executable with chmod +x as you will use 'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY "
+            "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' "
+            "to run it. Do not consider the task complete until deploy.sh has been successfully "
+            "executed and the deployment is verified working. Execute the script using the command "
+            "'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID "
+            "AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' to perform the initial deployment if "
+            "AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -588,9 +591,12 @@ def _build_solver_command_from_pr_and_chat(
             "deploy.sh script thoroughly and ensure it works correctly. If any issues arise during "
             "deployment, you MUST debug and fix them until the deployment process works flawlessly. "
             "Note that you do not need to make deploy.sh executable with chmod +x as you will use "
-            "'bash deploy.sh' to run it. Do not consider the task complete until deploy.sh has been "
-            "successfully executed and the deployment is verified working. Execute the script using "
-            "the command 'bash deploy.sh' to perform the initial deployment if AWS credentials are available.",
+            "'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID "
+            "AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' to run it. Do not consider the task complete "
+            "until deploy.sh has been successfully executed and the deployment is verified working. "
+            "Execute the script using the command 'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY "
+            "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' "
+            "to perform the initial deployment if AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -631,10 +637,13 @@ def _build_solver_command_from_pr(background: str, pr_comments: str) -> str:
             "as its last line. You MUST test the deploy.sh script thoroughly and ensure it works "
             "correctly. If any issues arise during deployment, you MUST debug and fix them until "
             "the deployment process works flawlessly. Note that you do not need to make deploy.sh "
-            "executable with chmod +x as you will use 'bash deploy.sh' to run it. Do not consider "
-            "the task complete until deploy.sh has been successfully executed and the deployment "
-            "is verified working. Execute the script using the command 'bash deploy.sh' to perform "
-            "the initial deployment if AWS credentials are available.",
+            "executable with chmod +x as you will use 'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY "
+            "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' "
+            "to run it. Do not consider the task complete until deploy.sh has been successfully "
+            "executed and the deployment is verified working. Execute the script using the command "
+            "'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID "
+            "AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' to perform the initial deployment if "
+            "AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
@@ -672,10 +681,13 @@ def _build_solver_command_from_chat(background: str, user_messages: str) -> str:
             "as its last line. You MUST test the deploy.sh script thoroughly and ensure it works "
             "correctly. If any issues arise during deployment, you MUST debug and fix them until "
             "the deployment process works flawlessly. Note that you do not need to make deploy.sh "
-            "executable with chmod +x as you will use 'bash deploy.sh' to run it. Do not consider "
-            "the task complete until deploy.sh has been successfully executed and the deployment "
-            "is verified working. Execute the script using the command 'bash deploy.sh' to perform "
-            "the initial deployment if AWS credentials are available.",
+            "executable with chmod +x as you will use 'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY "
+            "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' "
+            "to run it. Do not consider the task complete until deploy.sh has been successfully "
+            "executed and the deployment is verified working. Execute the script using the command "
+            "'AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID "
+            "AWS_REGION_NAME=$AWS_REGION_NAME bash deploy.sh' to perform the initial deployment if "
+            "AWS credentials are available.",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
             background,
