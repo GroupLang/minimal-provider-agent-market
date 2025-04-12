@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 from src.config import SETTINGS
 from src.enums import ModelName, ProviderType
+from loguru import logger
 
 load_dotenv()
 
@@ -59,6 +60,7 @@ def get_container_kwargs(
         "GIT_ASKPASS": "echo",
         "GIT_TERMINAL_PROMPT": "0",
     }
+    logger.info(f"Environment variables: {env_vars}")
     for key, value in _PROVIDER_CONFIGS[SETTINGS.provider].items():
         env_vars[key] = value
     volumes = {
