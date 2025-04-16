@@ -1,12 +1,58 @@
 import argparse
 import base64
 import os
+from functools import wraps
 
 from aider.coders import Coder
 from aider.io import InputOutput
 from aider.models import Model
+from loguru import logger
+
+from src.enums import ModelName, ProviderType
+from src.utils.cost_tracker import CostTracker
+
+def track_api_costs(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Extract model name from kwargs or first Model argument
+        model_name = kwargs.get('editor_model_name')
+        if not model_name and args:
+            model_name = args[0]
+        
+        # Map aider model names to our ModelName enum
+        model_map = {
+            "gpt-4": ModelName.gpt_4o,
+            "gpt-4-turbo": ModelName.gpt_4o,
+            "claude-2": ModelName.bedrock_claude_v2,
+        }
+        
+        tracked_model = model_map.get(model_name, ModelName.gpt_4o)
+        cost_tracker = CostTracker(tracked_model, ProviderType.OPENAI)
+        
+        # Patch the Model class to track costs
+        original_complete = Model.complete
+        
+        def tracked_complete(self, *complete_args, **complete_kwargs):
+            response = original_complete(self, *complete_args, **complete_kwargs)
+            if hasattr(response, 'usage'):
+                cost_tracker.calculate_cost(
+                    response.usage.prompt_tokens,
+                    response.usage.completion_tokens
+                )
+            return response
+        
+        Model.complete = tracked_complete
+        
+        try:
+            return func(*args, **kwargs)
+        finally:
+            # Restore original method
+            Model.complete = original_complete
+    
+    return wrapper
 
 
+@track_api_costs
 def modify_repo_with_aider(
     editor_model_name,
     solver_command,
