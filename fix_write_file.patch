@@ -1,0 +1,11 @@
+--- a/ra_aid/tools/write_file.py
++++ b/ra_aid/tools/write_file.py
+@@ -65,7 +65,7 @@
+     result = {'bytes_written': len(complete_file_contents)}
+     
+     print(
+-        ('initialized empty file' if not complete_file_contents else f'wrote {result['bytes_written']} bytes')
++        ('initialized empty file' if not complete_file_contents else f"wrote {result['bytes_written']} bytes")
+     )
+     
+     return result
