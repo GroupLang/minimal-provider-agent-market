@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from src.config import SETTINGS
+from src.utils.cost_tracker import CostTracker
+from src.enums import ModelName, ProviderType
 
 load_dotenv()
 openai.api_key = SETTINGS.openai_api_key
@@ -36,6 +38,8 @@ def _get_readme_content(repo_path: str) -> str:
 
 def suggest_test_command(repo_path: str) -> str:
     logger.info(f"Starting test command suggestion process for repo: {repo_path}")
+    # Initialize cost tracker for the weak model
+    cost_tracker = CostTracker(ModelName.gpt_4o, ProviderType.OPENAI, agent_type="aider")
     readme_content = _get_readme_content(repo_path)
 
     if not readme_content:
@@ -69,6 +73,11 @@ def suggest_test_command(repo_path: str) -> str:
             ],
         )
         command = response.choices[0].message.content.strip()
+        # Log the API cost
+        cost_tracker.log_interaction(
+            input_tokens=response.usage.prompt_tokens,
+            output_tokens=response.usage.completion_tokens
+        )
         if command:
             logger.info(f"Test command successfully generated: {command}")
             return command
@@ -103,6 +112,13 @@ def get_container_kwargs(
     ]
     logger.info(f"Entrypoint: {entrypoint}")
     env_vars = {key: os.getenv(key) for key in os.environ.keys()}
+    # Add cost tracking configuration
+    env_vars.update({
+        "TRACK_API_COSTS": "true",
+        "COST_TRACKER_MODEL": model_name,
+        "COST_TRACKER_PROVIDER": "openai",  # Aider uses OpenAI by default
+        "COST_TRACKER_ARCHITECT_MODEL": architect_model_name if architect_model_name else "",
+    })
     volumes = {
         repo_directory: {"bind": "/app", "mode": "rw"},
         "/tmp/aider_cache": {"bind": "/home/ubuntu", "mode": "rw"},

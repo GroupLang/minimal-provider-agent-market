@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 from src.config import SETTINGS
 from src.enums import ModelName, ProviderType
+from src.utils.cost_tracker import CostTracker
 
 load_dotenv()
 
@@ -58,6 +59,10 @@ def get_container_kwargs(
         "LOG_ALL_EVENTS": "true",
         "GIT_ASKPASS": "echo",
         "GIT_TERMINAL_PROMPT": "0",
+        "TRACK_API_COSTS": "true",
+        "COST_TRACKER_MODEL": model_name.value,
+        "COST_TRACKER_PROVIDER": SETTINGS.provider.value,
+        "COST_TRACKER_AGENT_TYPE": "openhands",
     }
     for key, value in _PROVIDER_CONFIGS[SETTINGS.provider].items():
         env_vars[key] = value
