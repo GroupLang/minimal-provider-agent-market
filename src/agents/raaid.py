@@ -2,6 +2,7 @@ import os
 from typing import Any, Dict
 
 from src.enums import ModelName
+from src.utils.cost_tracker import MODEL_COSTS
 
 
 def get_container_kwargs(
@@ -28,6 +29,12 @@ def get_container_kwargs(
         "/tmp/aider_cache": {"bind": "/home/ubuntu", "mode": "rw"},
     }
     env_vars = {key: os.getenv(key) for key in os.environ.keys()}
+    # Add cost tracking configuration
+    env_vars.update({
+        "TRACK_API_COSTS": "true",
+        "MODEL_COSTS_GEMINI": str(MODEL_COSTS.get("openrouter/deepseek/deepseek-r1", {"input": 0.001, "output": 0.002})),
+        "MODEL_COSTS_EXPERT": str(MODEL_COSTS.get("o3-mini", {"input": 0.0002, "output": 0.0004})),
+    })
     user = f"{os.getuid()}:{os.getgid()}"
     kwargs = {
         "image": "aider-raaid",
