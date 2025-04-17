@@ -50,55 +50,93 @@ def _get_instance_to_solve(instance_id: str, settings: Settings) -> Optional[Ins
     headers = {
         "x-api-key": settings.market_api_key,
     }
-    with httpx.Client(timeout=TIMEOUT) as client:
-        instance_endpoint = f"{settings.market_url}/v1/instances/{instance_id}"
-        response = client.get(instance_endpoint, headers=headers)
-        instance = response.json()
-
-        if instance["status"] != settings.market_resolved_instance_code:
-            return None
+    try:
+        with httpx.Client(timeout=TIMEOUT) as client:
+            instance_endpoint = f"{settings.market_url}/v1/instances/{instance_id}"
+            response = client.get(instance_endpoint, headers=headers)
+            response.raise_for_status()
+            instance = response.json()
+            
+            if not isinstance(instance, dict):
+                logger.error(f"Unexpected response format for instance {instance_id}: {instance}")
+                return None
+                
+            if "status" not in instance:
+                logger.error(f"Missing status field in instance {instance_id}: {instance}")
+                return None
+                
+            if instance["status"] != settings.market_resolved_instance_code:
+                return None
+    except httpx.HTTPError as e:
+        logger.error(f"HTTP error while fetching instance {instance_id}: {e}")
+        return None
+    except (KeyError, ValueError, TypeError) as e:
+        logger.error(f"Error parsing response for instance {instance_id}: {e}")
+        return None
 
     repo_url = utils.find_github_repo_url(instance["background"])
     if not repo_url:
         logger.info(f"Instance id {instance_id} does not have a github repo url")
         return InstanceToSolve(instance=instance)
 
-    with httpx.Client(timeout=TIMEOUT) as client:
-        chat_endpoint = f"{settings.market_url}/v1/chat/{instance_id}"
-        response = client.get(chat_endpoint, headers=headers)
+    try:
+        with httpx.Client(timeout=TIMEOUT) as client:
+            chat_endpoint = f"{settings.market_url}/v1/chat/{instance_id}"
+            response = client.get(chat_endpoint, headers=headers)
+            response.raise_for_status()
+            
+            chat = response.json()
+            if not chat:
+                return InstanceToSolve(instance=instance, repo_url=repo_url)
+            
+            if not isinstance(chat, list):
+                logger.error(f"Unexpected chat format for instance {instance_id}: {chat}")
+                return InstanceToSolve(instance=instance, repo_url=repo_url)
 
-        chat = response.json()
-        if not chat:
-            return InstanceToSolve(instance=instance, repo_url=repo_url)
+            try:
+                messages_from_provider_present = any(
+                    isinstance(message, dict) and message.get("sender") == "provider" 
+                    for message in chat
+                )
+                logger.info(
+                    f"Instance id {instance_id} messages from provider: {messages_from_provider_present}"
+                )
 
-        messages_from_provider_present = any(message["sender"] == "provider" for message in chat)
-        logger.info(
-            f"Instance id {instance_id} messages from provider: {messages_from_provider_present}"
+                valid_messages = [m for m in chat if isinstance(m, dict) and "timestamp" in m and "sender" in m]
+                messages_with_requester = None
+                if valid_messages:
+                    latest_message = sorted(valid_messages, key=lambda m: m["timestamp"])[-1]
+                    if latest_message["sender"] == "requester":
+                        messages_with_requester = utils.format_messages(chat)
+                logger.info(f"Messages with requester: {messages_with_requester}")
+
+                formatted_messages = utils.format_messages(chat)
+                pr_url = utils.get_pr_url(formatted_messages)
+                logger.info(
+                    "PR URL {} found {} for instance id {}. Looking for PR comments".format(
+                        "NOT" if not pr_url else "", pr_url if pr_url else "", instance_id
+                    )
+                )
+            except Exception as e:
+                logger.error(f"Error processing chat messages for instance {instance_id}: {e}")
+                return InstanceToSolve(instance=instance, repo_url=repo_url)
+
+    except httpx.HTTPError as e:
+        logger.error(f"HTTP error while fetching chat for instance {instance_id}: {e}")
+        return InstanceToSolve(instance=instance, repo_url=repo_url)
+    except (ValueError, TypeError) as e:
+        logger.error(f"Error parsing chat response for instance {instance_id}: {e}")
+        return InstanceToSolve(instance=instance, repo_url=repo_url)
+
+    if not pr_url:
+        return InstanceToSolve(
+            instance=instance,
+            repo_url=repo_url,
+            messages_with_requester=messages_with_requester,
+            started_solving=messages_from_provider_present,
         )
 
-        messages_with_requester = (
-            utils.format_messages(chat)
-            if sorted(chat, key=lambda m: m["timestamp"])[-1]["sender"] == "requester"
-            else None
-        )
-        logger.info(f"Messages with requester: {messages_with_requester}")
-
-        formatted_messages = utils.format_messages(chat)
-        pr_url = utils.get_pr_url(formatted_messages)
-        logger.info(
-            "PR URL {} found {} for instance id {}. Looking for PR comments".format(
-                "NOT" if not pr_url else "", pr_url if pr_url else "", instance_id
-            )
-        )
-
-        if not pr_url:
-            return InstanceToSolve(
-                instance=instance,
-                repo_url=repo_url,
-                messages_with_requester=messages_with_requester,
-                started_solving=messages_from_provider_present,
-            )
-
+    try:
         logger.info(f"Looking for PR comments in chat with instance id {instance_id}")
         pr_comments = utils.get_last_pr_comments(pr_url, settings.github_pat)
         pr_comments = pr_comments if pr_comments else None
@@ -112,6 +150,15 @@ def _get_instance_to_solve(instance_id: str, settings: Settings) -> Optional[Ins
             repo_url=repo_url,
             pr_url=pr_url,
             pr_comments=pr_comments,
+            messages_with_requester=messages_with_requester,
+            started_solving=messages_from_provider_present,
+        )
+    except Exception as e:
+        logger.error(f"Error getting PR comments for instance {instance_id}: {e}")
+        return InstanceToSolve(
+            instance=instance,
+            repo_url=repo_url,
+            pr_url=pr_url,
             messages_with_requester=messages_with_requester,
             started_solving=messages_from_provider_present,
         )
@@ -250,31 +297,70 @@ def get_awarded_proposals(settings: Settings) -> list[dict]:
     }
     url = f"{settings.market_url}/v1/proposals/"
 
-    response = httpx.get(url, headers=headers)
-    response.raise_for_status()
-    all_proposals = response.json()
+    try:
+        with httpx.Client(timeout=TIMEOUT) as client:
+            response = client.get(url, headers=headers)
+            response.raise_for_status()
+            all_proposals = response.json()
 
-    current_time = datetime.utcnow()
-    one_day_ago = current_time - timedelta(days=1)
+            if not isinstance(all_proposals, list):
+                logger.error(f"Unexpected proposals format: {all_proposals}")
+                return []
 
-    awarded_proposals = [
-        p
-        for p in all_proposals
-        if p["status"] == settings.market_awarded_proposal_code
-        and datetime.fromisoformat(p["creation_date"]) > one_day_ago
-    ]
-    return awarded_proposals
+            current_time = datetime.utcnow()
+            one_day_ago = current_time - timedelta(days=1)
+
+            awarded_proposals = []
+            for p in all_proposals:
+                try:
+                    if not isinstance(p, dict):
+                        continue
+                    if "status" not in p or "creation_date" not in p:
+                        continue
+                    if p["status"] == settings.market_awarded_proposal_code:
+                        creation_date = datetime.fromisoformat(p["creation_date"])
+                        if creation_date > one_day_ago:
+                            awarded_proposals.append(p)
+                except (ValueError, TypeError, KeyError) as e:
+                    logger.error(f"Error processing proposal: {e}")
+                    continue
+
+            return awarded_proposals
+
+    except httpx.HTTPError as e:
+        logger.error(f"HTTP error while fetching proposals: {e}")
+        return []
+    except (ValueError, TypeError) as e:
+        logger.error(f"Error parsing proposals response: {e}")
+        return []
+    except Exception as e:
+        logger.error(f"Unexpected error in get_awarded_proposals: {e}")
+        return []
 
 
-def _send_message(instance_id: str, message: str, settings: Settings) -> None:
+def _send_message(instance_id: str, message: str, settings: Settings) -> bool:
+    """Send a message to the instance chat.
+    
+    Returns:
+        bool: True if message was sent successfully, False otherwise.
+    """
     headers = {
         "x-api-key": settings.market_api_key,
     }
     url = f"{settings.market_url}/v1/chat/send-message/{instance_id}"
     data = {"message": message}
 
-    response = httpx.post(url, headers=headers, json=data)
-    response.raise_for_status()
+    try:
+        with httpx.Client(timeout=TIMEOUT) as client:
+            response = client.post(url, headers=headers, json=data)
+            response.raise_for_status()
+            return True
+    except httpx.HTTPError as e:
+        logger.error(f"HTTP error while sending message to instance {instance_id}: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"Unexpected error while sending message to instance {instance_id}: {e}")
+        return False
 
 
 def solve_instances_handler() -> None:
@@ -314,13 +400,11 @@ def solve_instances_handler() -> None:
         except Exception as e:
             logger.error(f"Error solving instance id {instance_to_solve.instance['id']}: {e}")
         else:
-            try:
-                _send_message(
-                    instance_to_solve.instance["id"],
-                    message,
-                    SETTINGS,
-                )
-            except Exception as e:
+            if not _send_message(
+                instance_to_solve.instance["id"],
+                message,
+                SETTINGS,
+            ):
                 logger.error(
-                    f"Error sending message for instance id {instance_to_solve.instance['id']}: {e}"
+                    f"Failed to send message for instance id {instance_to_solve.instance['id']}"
                 )
