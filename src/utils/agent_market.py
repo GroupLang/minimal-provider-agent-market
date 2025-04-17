@@ -4,6 +4,7 @@ from typing import Optional
 import openai
 
 from src.config import SETTINGS
+from src.utils.cost_tracker import cost_tracker
 
 openai.api_key = SETTINGS.openai_api_key
 WEAK_MODEL = "gpt-4o-mini"
@@ -29,6 +30,14 @@ def get_pr_title(background: str) -> str:
             },
         ],
     )
+    
+    # Track API cost
+    cost_tracker.log_api_cost(
+        model=WEAK_MODEL,
+        input_tokens=response.usage.prompt_tokens,
+        output_tokens=response.usage.completion_tokens
+    )
+    
     return response.choices[0].message.content.strip()
 
 
@@ -57,6 +66,14 @@ def get_pr_body(background: str, logs: str) -> str:
             },
         ],
     )
+    
+    # Track API cost
+    cost_tracker.log_api_cost(
+        model=WEAK_MODEL,
+        input_tokens=response.usage.prompt_tokens,
+        output_tokens=response.usage.completion_tokens
+    )
+    
     body = response.choices[0].message.content.strip()
 
     if issue_number is not None and f"fixes #{issue_number}" not in body.lower():
