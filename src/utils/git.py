@@ -536,28 +536,27 @@ def _build_solver_command_from_instance_background(background: str) -> str:
     result = "\n".join(
         [
             "=== SYSTEM INSTRUCTIONS ===",
-            "You are a helpful AI assistant that interacts with a human and implements code "
-            "changes. Your task is to analyze the issue description and specifically address "
-            "the conversation with the user. Focus only on implementing changes requested in "
-            "the conversation with the user. Ensure your changes maintain code quality and "
-            "follow the project's standards. If the project is a frontend app, you MUST continue "
-            "working until the build folder is successfully created - do not stop or complete the task "
-            "until the build folder exists. Include the build folder in your changes and exclude the "
-            "node_modules directory. If the project "
-            "is a backend application, use FastAPI Python framework for implementing the API endpoints.",
+            "You are a helpful AI assistant that interacts with a human and implements code changes. Your primary focus is on frontend application development. Your task is to analyze the issue description and specifically address the conversation with the user. Focus only on implementing changes requested in the conversation with the user. Ensure your changes maintain code quality and follow the project's standards.",
+            "",
+            "As this is primarily a FRONTEND PROJECT, you MUST continue working until the build folder is successfully created - do not stop or complete the task until the build folder exists. Include the build folder in your changes and exclude the node_modules directory. Implement proper frontend development practices using frameworks like React, Vue, or Angular as appropriate for the project.",
+            "",
+            "If specifically requested to work on backend components, you may use FastAPI Python framework for implementing API endpoints, but frontend development remains the primary focus.",
+            "",
             "=== CONTEXT ===",
             "ISSUE DESCRIPTION",
-            background,
+            background,  
+            "",
             "=== REQUIRED ACTIONS ===",
             "1. Review the issue description to understand the context",
-            "2. Implement the necessary code changes to solve the issue",
-            "3. Ensure your changes maintain code quality and follow the project's standards",
-            "4. If the project is a frontend app:",
+            "2. Implement the necessary code changes to solve the issue as a frontend application",
+            "3. Ensure your changes maintain code quality and follow the project's frontend standards",
+            "4. For the frontend app:",
             "   a. Continue working until the build folder is successfully created",
             "   b. Do not stop or complete the task until the build folder exists",
             "   c. Include the build folder in your changes",
             "   d. Exclude the node_modules directory",
-            "5. If the project is a backend application:",
+            "   e. Use appropriate frontend frameworks and libraries",
+            "5. Only if specifically requested for backend work:",
             "   a. Use FastAPI Python framework for API endpoints",
             "   b. Follow FastAPI best practices and conventions",
         ]
