@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 from src.config import SETTINGS
 from src.enums import ModelName, ProviderType
+from src.utils.cost_tracker import APIInteractionCost
 
 load_dotenv()
 
@@ -44,6 +45,9 @@ def get_container_kwargs(
         "ALWAYS STAY IN THE SAME REPOSITORY BRANCH."
     )
     entrypoint = ["python", "-m", "openhands.core.main", "-t", solver_command]
+    # Initialize cost tracker
+    cost_tracker = APIInteractionCost(model_name, SETTINGS.provider)
+    
     env_vars = {
         "SANDBOX_RUNTIME_CONTAINER_IMAGE": _RUNTIME_IMAGE,
         "SANDBOX_USER_ID": str(os.getuid()),
@@ -58,6 +62,9 @@ def get_container_kwargs(
         "LOG_ALL_EVENTS": "true",
         "GIT_ASKPASS": "echo",
         "GIT_TERMINAL_PROMPT": "0",
+        "ENABLE_COST_TRACKING": "true",
+        "MODEL_NAME": model_name.value,
+        "PROVIDER_TYPE": SETTINGS.provider.value,
     }
     for key, value in _PROVIDER_CONFIGS[SETTINGS.provider].items():
         env_vars[key] = value
