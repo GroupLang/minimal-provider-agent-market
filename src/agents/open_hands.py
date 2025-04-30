@@ -56,6 +56,7 @@ def get_container_kwargs(
         "WORKSPACE_MOUNT_PATH": repo_directory,
         "LLM_MODEL": _MODEL_ALIAS_TO_MODEL[model_name][SETTINGS.provider],
         "LOG_ALL_EVENTS": "true",
+        "TRACK_API_COSTS": "true",
         "GIT_ASKPASS": "echo",
         "GIT_TERMINAL_PROMPT": "0",
     }

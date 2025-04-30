@@ -28,6 +28,10 @@ def get_container_kwargs(
         "/tmp/aider_cache": {"bind": "/home/ubuntu", "mode": "rw"},
     }
     env_vars = {key: os.getenv(key) for key in os.environ.keys()}
+    env_vars.update({
+        "TRACK_API_COSTS": "true",
+        "LOG_ALL_EVENTS": "true"
+    })
     user = f"{os.getuid()}:{os.getgid()}"
     kwargs = {
         "image": "aider-raaid",
