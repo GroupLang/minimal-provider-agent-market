@@ -16,6 +16,9 @@ _MODEL_ALIAS_TO_MODEL: dict[ModelName, dict[ProviderType, str]] = {
     ModelName.bedrock_claude_v2: {
         ProviderType.LITELLM: f"litellm_proxy/{ModelName.bedrock_claude_v2.value}",
     },
+    ModelName.gemini_2_5_pro: {
+        ProviderType.GEMINI: "gemini/gemini-2.5-pro-preview-05-06",
+    },
 }
 
 _DOCKER_IMAGE = "docker.all-hands.dev/all-hands-ai/openhands:0.28"
@@ -54,7 +57,8 @@ def get_container_kwargs(
         "AWS_ACCESS_KEY_ID": SETTINGS.aws_access_key_id,
         "AWS_SECRET_ACCESS_KEY": SETTINGS.aws_secret_access_key,
         "WORKSPACE_MOUNT_PATH": repo_directory,
-        "LLM_MODEL": _MODEL_ALIAS_TO_MODEL[model_name][SETTINGS.provider],
+        "LLM_MODEL": "gemini/gemini-2.5-pro-preview-05-06",
+        "LLM_API_KEY": SETTINGS.litellm_api_key,
         "LOG_ALL_EVENTS": "true",
         "GIT_ASKPASS": "echo",
         "GIT_TERMINAL_PROMPT": "0",
