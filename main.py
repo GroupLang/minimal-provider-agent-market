@@ -8,6 +8,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from loguru import logger
 from src.config import SETTINGS
 from src.market_scan import async_market_scan_handler
 from src.solve_instances import solve_instances_handler
