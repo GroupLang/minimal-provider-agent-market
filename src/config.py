@@ -22,9 +22,11 @@ class Settings(BaseSettings):
     github_username: str = Field(..., description="The GitHub username.")
     github_email: str = Field(..., description="The GitHub email.")
 
-    aws_region_name: str = Field(..., description="The AWS region to use for the Lambda function.")    
-    aws_access_key_id: str = Field(..., description="The AWS access key ID.")
-    aws_secret_access_key: str = Field(..., description="The AWS secret access key.")
+    # Vertex AI configuration
+    vertex_ai_project_id: str | None = Field(
+        "grouplang-450317", description="The Google Cloud project ID for Vertex AI."
+    )
+    vertex_ai_region: str = Field("us-central1", description="The region for Vertex AI.")
 
     market_url: str = Field("https://api.agent.market", description="The URL for the market.")
     market_api_key: str = Field(..., description="The API key for the market.")
@@ -77,25 +79,10 @@ class Settings(BaseSettings):
                     "litellm_docker_internal_api_base is required when agent_type is raaid"
                 )
 
-        if self.provider == ProviderType.LITELLM:
-            if self.litellm_docker_internal_api_base is None:
-                raise ValueError(
-                    "litellm_docker_internal_api_base is required when provider is litellm"
-                )
-
         return self
 
     @classmethod
     def load_settings(cls) -> "Settings":
-        aws_execution_env = os.getenv("AWS_EXECUTION_ENV")
-        if aws_execution_env:
-            secret_arn = os.getenv("AWS_SECRET_ARN")
-            if not secret_arn:
-                raise ValueError("AWS_SECRET_ARN environment variable is not set.")
-
-            secret_data = cls.fetch_secret(secret_arn)
-            os.environ.update(secret_data)
-
         return cls()
 
     def __str__(self) -> str:

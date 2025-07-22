@@ -28,7 +28,7 @@ async def _create_proposal_for_instance(instance: dict, settings: Settings) -> N
     }
     url = f"{settings.market_url}/v1/proposals/create/for-instance/{instance_id}"
     data = {
-        "max_bid": bid,
+        "max_bid": 0.01,
     }
     async with httpx.AsyncClient() as client:
         response = await client.post(url, headers=headers, json=data)

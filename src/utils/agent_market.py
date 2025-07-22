@@ -33,9 +33,6 @@ def get_pr_title(background: str) -> str:
 
 
 def get_pr_body(background: str, logs: str) -> str:
-    match = re.search(r"Issue Number: (\d+)", background)
-    issue_number = match.group(1) if match else None
-
     response = openai.chat.completions.create(
         model=WEAK_MODEL,
         messages=[
@@ -58,9 +55,6 @@ def get_pr_body(background: str, logs: str) -> str:
         ],
     )
     body = response.choices[0].message.content.strip()
-
-    if issue_number is not None and f"fixes #{issue_number}" not in body.lower():
-        body = f"{body}\n\nFixes #{issue_number}"
 
     return body
 

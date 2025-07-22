@@ -39,11 +39,35 @@ def clone_repository(repo_url: str, target_dir: str, github_token: str = None) -
 def fork_repo(github_url: str, github_token: str) -> str:
     g = github.Github(github_token)
     repo_path = github_url.replace("https://github.com/", "").removesuffix(".git")
-    repo = g.get_repo(repo_path)
+
+    try:
+        repo = g.get_repo(repo_path)
+    except github.UnknownObjectException as e:
+        logger.error(f"Repository not found: {repo_path}. Error: {e}")
+        raise ValueError(
+            f"Repository {repo_path} not found. It may be private, deleted, or the URL is incorrect."
+        )
+    except github.GithubException as e:
+        if e.status == 404:
+            logger.error(f"404 error accessing repository: {repo_path}")
+            raise ValueError(
+                f"Repository {repo_path} returned 404. Check if the repository exists and is accessible."
+            )
+        else:
+            logger.error(
+                f"GitHub API error accessing repository {repo_path}: {e.status} - {e.data}"
+            )
+            raise
+
     user = g.get_user()
-    forked_repo = user.create_fork(repo)
-    logger.info("Forked repo: {}", forked_repo.clone_url)
-    return forked_repo.clone_url
+
+    try:
+        forked_repo = user.create_fork(repo)
+        logger.info("Forked repo: {}", forked_repo.clone_url)
+        return forked_repo.clone_url
+    except github.GithubException as e:
+        logger.error(f"Error creating fork for {repo_path}: {e.status} - {e.data}")
+        raise
 
 
 def add_and_commit(repo_path: str) -> None:
@@ -112,7 +136,6 @@ def add_and_commit(repo_path: str) -> None:
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         raise
-
 
 
 def push_commits(repo_path: str, github_token: str) -> bool:
@@ -537,38 +560,16 @@ def _build_solver_command_from_instance_background(background: str) -> str:
         [
             "=== SYSTEM INSTRUCTIONS ===",
             "You are a helpful AI assistant that interacts with a human and implements code "
-            "changes. Your task is to analyze the issue description and specifically address "
-            "the conversation with the user. Focus only on implementing changes requested in "
-            "the conversation with the user. Ensure your changes maintain code quality and "
-            "follow the project's standards. If the project is a frontend app or FastAPI backend, "
-            "you must create a deploy.sh file that handles deployment using AWS credentials "
-            "(AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment "
-            "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
-            "set up AWS ECS deployment. When creating the ECS task definition, ensure portMappings " 
-            "have matching hostPort and containerPort values for awsvpc network mode. Example:\n"
-            "   ```json\n"
-            "   \"portMappings\": [\n"
-            "     {\n"
-            "       \"containerPort\": 5000,\n"
-            "       \"hostPort\": 5000\n"
-            "     }\n"
-            "   ]\n"
-            "   ```\n"
-            "After creating the deploy script, ensure it prints the "
-            "resource address (the CloudFront URL for frontend or API endpoint URL for FastAPI) "
-            "as its last line. Then execute the script to perform the initial deployment if AWS "
-            "credentials are available.",
+            "changes. Your task is to analyze the task description and implement the requested "
+            "changes. Focus on understanding the requirements and implementing them effectively. "
+            "Ensure your changes maintain code quality and follow the project's standards.",
             "=== CONTEXT ===",
-            "ISSUE DESCRIPTION",
+            "TASK DESCRIPTION",
             background,
             "=== REQUIRED ACTIONS ===",
-            "1. Review the issue description to understand the context",
-            "2. Implement the necessary code changes to solve the issue",
+            "1. Review the task description to understand the requirements",
+            "2. Implement the necessary code changes to complete the task",
             "3. Ensure your changes maintain code quality and follow the project's standards",
-            "4. If the project is a frontend app or FastAPI backend:",
-            "   a. Create deploy.sh with AWS S3 configuration for frontend or AWS ECS for FastAPI",
-            "   b. Verify AWS credentials (AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME)",
-            "   c. Execute deploy.sh for initial deployment if credentials are available",
         ]
     )
     return result
@@ -582,33 +583,23 @@ def _build_solver_command_from_pr_and_chat(
             "=== SYSTEM INSTRUCTIONS ===",
             "You are a helpful AI assistant that interacts with a human and implements code "
             "changes based on feedback provided via a pull request or a chat. Your task is to "
-            "analyze the issue description and specifically address the LAST comment in the "
+            "analyze the task description and specifically address the LAST comment in the "
             "pull request. Focus only on implementing changes requested in the most recent "
-            "comment. If the project is a frontend app or FastAPI backend, you must create a "
-            "deploy.sh file that handles deployment using AWS credentials (AWS_SECRET_ACCESS_KEY, "
-            "AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment variables. For frontend "
-            "apps, configure AWS S3 website hosting. For FastAPI, set up AWS ECS deployment. "
-            "After creating the deploy script, ensure it prints the resource address (the CloudFront URL "
-            "for frontend or API endpoint URL for FastAPI) as its last line. Then execute the script "
-            "to perform the initial deployment if AWS credentials are available.",
+            "comment.",
             "=== CONTEXT ===",
-            "ISSUE DESCRIPTION",
+            "TASK DESCRIPTION",
             background,
             "PULL REQUEST DETAILS",
             pr_comments,
             "CONVERSATION WITH THE USER",
             user_messages,
             "=== REQUIRED ACTIONS ===",
-            "1. Review the issue description to understand the context",
+            "1. Review the task description to understand the context",
             "2. Analyze the pull request diff and comments",
             "3. Analyze the conversation with the user",
             "4. Implement the necessary code changes addressing the feedback in the last comment "
             "of the PR and the conversation with the user",
             "5. Ensure your changes maintain code quality and follow the project's standards",
-            "6. If the project is a frontend app or FastAPI backend:",
-            "   a. Create deploy.sh with AWS S3 configuration for frontend or AWS ECS for FastAPI",
-            "   b. Verify AWS credentials (AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME)",
-            "   c. Execute deploy.sh for initial deployment if credentials are available",
         ]
     )
     return result
@@ -619,32 +610,21 @@ def _build_solver_command_from_pr(background: str, pr_comments: str) -> str:
         [
             "=== SYSTEM INSTRUCTIONS ===",
             "You are a helpful AI assistant that interacts with a human and implements code "
-            "changes. Your task is to analyze the issue description and specifically address "
+            "changes. Your task is to analyze the task description and specifically address "
             "the last comment in the pull request. Focus only on implementing changes requested "
             "in the most recent comment. Ensure your changes maintain code quality and follow "
-            "the project's standards. If the project is a frontend app or FastAPI backend, you "
-            "must create a deploy.sh file that handles deployment using AWS credentials "
-            "(AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment "
-            "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
-            "set up AWS ECS deployment. After creating the deploy script, ensure it prints the "
-            "resource address (the CloudFront URL for frontend or API endpoint URL for FastAPI) "
-            "as its last line. Then execute the script to perform the initial deployment if AWS "
-            "credentials are available.",
+            "the project's standards.",
             "=== CONTEXT ===",
-            "ISSUE DESCRIPTION",
+            "TASK DESCRIPTION",
             background,
             "PULL REQUEST DETAILS",
             pr_comments,
             "=== REQUIRED ACTIONS ===",
-            "1. Review the issue description to understand the context",
+            "1. Review the task description to understand the context",
             "2. Analyze the pull request diff and comments",
             "3. Implement the necessary code changes addressing the feedback in the last comment "
             "of the PR",
             "4. Ensure your changes maintain code quality and follow the project's standards",
-            "5. If the project is a frontend app or FastAPI backend:",
-            "   a. Create deploy.sh with AWS S3 configuration for frontend or AWS ECS for FastAPI",
-            "   b. Verify AWS credentials (AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME)",
-            "   c. Execute deploy.sh for initial deployment if credentials are available",
         ]
     )
     return result
@@ -655,30 +635,21 @@ def _build_solver_command_from_chat(background: str, user_messages: str) -> str:
         [
             "=== SYSTEM INSTRUCTIONS ===",
             "You are a helpful AI assistant that interacts with a human and implements code "
-            "changes. Your task is to analyze the issue description and specifically address the "
+            "changes. Your task is to analyze the task description and specifically address the "
             "conversation with the user. Focus only on implementing changes requested in the "
             "conversation with the user. Ensure your changes maintain code quality and follow the "
-            "project's standards. If the project is a frontend app or FastAPI backend, you must "
-            "create a deploy.sh file that handles deployment using AWS credentials "
-            "(AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME) stored as environment "
-            "variables. For frontend apps, configure AWS S3 website hosting. For FastAPI, "
-            "set up AWS ECS deployment. After creating the deploy script, execute it to perform "
-            "the initial deployment if AWS credentials are available.",
+            "project's standards.",
             "=== CONTEXT ===",
-            "ISSUE DESCRIPTION",
+            "TASK DESCRIPTION",
             background,
             "CONVERSATION WITH THE USER",
             user_messages,
             "=== REQUIRED ACTIONS ===",
-            "1. Review the issue description to understand the context",
+            "1. Review the task description to understand the context",
             "2. Analyze the conversation with the user",
             "3. Implement the necessary code changes addressing the feedback in the conversation "
             "with the user",
             "4. Ensure your changes maintain code quality and follow the project's standards",
-            "5. If the project is a frontend app or FastAPI backend:",
-            "   a. Create deploy.sh with AWS S3 configuration for frontend or AWS ECS for FastAPI",
-            "   b. Verify AWS credentials (AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_REGION_NAME)",
-            "   c. Execute deploy.sh for initial deployment if credentials are available",
         ]
     )
     return result

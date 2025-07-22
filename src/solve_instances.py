@@ -63,6 +63,28 @@ def _get_instance_to_solve(instance_id: str, settings: Settings) -> Optional[Ins
         logger.info(f"Instance id {instance_id} does not have a github repo url")
         return InstanceToSolve(instance=instance)
 
+    # Validate repository exists before proceeding
+    try:
+        import github
+
+        g = github.Github(settings.github_pat)
+        repo_path = repo_url.replace("https://github.com/", "").removesuffix(".git")
+        g.get_repo(repo_path)
+        logger.info(f"Repository {repo_path} validation successful for instance {instance_id}")
+    except github.UnknownObjectException:
+        logger.error(f"Repository {repo_path} not found for instance {instance_id}")
+        return None
+    except github.GithubException as e:
+        if e.status == 404:
+            logger.error(f"Repository {repo_path} returned 404 for instance {instance_id}")
+            return None
+        else:
+            logger.warning(f"GitHub API error validating repository {repo_path}: {e.status}")
+            # Continue with processing despite validation error
+    except Exception as e:
+        logger.warning(f"Unexpected error validating repository {repo_path}: {e}")
+        # Continue with processing despite validation error
+
     with httpx.Client(timeout=TIMEOUT) as client:
         chat_endpoint = f"{settings.market_url}/v1/chat/{instance_id}"
         response = client.get(chat_endpoint, headers=headers)
@@ -181,6 +203,13 @@ def _solve_instance(
         elif settings.agent_type == AgentType.raaid:
             utils.change_directory_ownership_recursive(repo_absolute_path, os.getuid(), os.getgid())
             container_kwargs = agents.raaid_get_container_kwargs(
+                str(repo_absolute_path),
+                solver_command,
+                settings.foundation_model_name,
+            )
+        elif settings.agent_type == AgentType.claude_code:
+            utils.change_directory_ownership_recursive(repo_absolute_path, os.getuid(), os.getgid())
+            container_kwargs = agents.claude_code_get_container_kwargs(
                 str(repo_absolute_path),
                 solver_command,
                 settings.foundation_model_name,

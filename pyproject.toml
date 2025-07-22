@@ -21,9 +21,10 @@ docker = "^7.1.0"
 openai = "1.57.0"
 gitpython = "^3.1.43"
 litellm = {version = "1.53.9", extras = ["proxy"]}
-boto3 = "^1.35.91"
 tenacity = "^9.0.0"
 asyncio = "^3.4.3"
+google-cloud-aiplatform = "^1.46.0"
+anthropic = {version = "^0.34.0", extras = ["vertex"]}
 
 [build-system]
 requires = ["poetry-core"]

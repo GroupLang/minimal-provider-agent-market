@@ -10,7 +10,8 @@ This service consists of two main components:
 ## Features
 
 - Automatic market scanning and proposal creation
-- AI-powered code modifications using Aider
+- AI-powered code modifications using multiple agents (Aider, OpenHands, RAAID, Claude Code)
+- Support for Claude Code with Google Vertex AI integration
 - GitHub integration for repository forking and pull request creation
 - Docker containerization for isolated execution
 - Configurable bid amounts and API settings
@@ -19,7 +20,8 @@ This service consists of two main components:
 
 - Python 3.8+
 - Docker
-- OpenAI API key
+- OpenAI API key (for OpenAI-based agents)
+- Google Cloud Platform account with Vertex AI access (for Claude Code)
 - Agent Market API key
 - GitHub Personal Access Token
 
@@ -52,6 +54,52 @@ MAX_BID=0.01
 GITHUB_USERNAME=your_github_username
 GITHUB_EMAIL=your_github_email
 ```
+
+## Claude Code with Vertex AI Setup
+
+For using Claude Code with Google Vertex AI, use the automated setup:
+
+```bash
+# Quick setup for Claude Code
+./setup-claude-code.sh
+```
+
+This will:
+- Create a `.env` file configured for Claude Code and Vertex AI
+- Install required dependencies (`anthropic[vertex]`, `google-cloud-aiplatform`)
+- Build the Claude Code Docker image
+- Validate your environment configuration
+
+### Manual Claude Code Setup
+
+1. **Configure for Claude Code**:
+```bash
+# Copy the Claude Code environment template
+cp claude-code.env.example .env
+```
+
+2. **Edit `.env` with your credentials**:
+```bash
+AGENT_TYPE=claude-code
+FOUNDATION_MODEL_NAME=claude_sonnet_4_vertex
+PROVIDER=vertex-ai
+VERTEX_AI_PROJECT_ID=your-gcp-project-id
+VERTEX_AI_REGION=us-east5
+GITHUB_PAT=your_github_token
+MARKET_API_KEY=your_market_api_key
+```
+
+3. **Authenticate with Google Cloud**:
+```bash
+gcloud auth application-default login
+```
+
+4. **Install Vertex AI dependencies**:
+```bash
+pip install "anthropic[vertex]" google-cloud-aiplatform
+```
+
+For detailed Claude Code setup instructions, see [CLAUDE_CODE_SETUP.md](CLAUDE_CODE_SETUP.md).
 
 ## Running the Service
 

@@ -50,11 +50,10 @@ def get_container_kwargs(
     ]
 
     # Fix permissions and run Claude Code
-    cmd = " ".join(claude_code_cmd)
     entrypoint = [
         "sh",
         "-c",
-        f"chown -R claude:claude /workspace && chmod -R 755 /workspace && {cmd}",
+        f"chown -R claude:claude /workspace && chmod -R 755 /workspace && {' '.join(claude_code_cmd)}",
     ]
 
     env_vars = {
@@ -95,7 +94,6 @@ def get_container_kwargs(
         "name": container_name,
         "extra_hosts": _DOCKER_NETWORK_HOST,
         "working_dir": "/workspace",
-        "user": "root",  # Run as root to fix permissions
     }
 
     return kwargs

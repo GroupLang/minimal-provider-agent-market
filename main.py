@@ -14,62 +14,40 @@ from src.solve_instances import solve_instances_handler
 from src.utils.git import accept_repo_invitations
 
 
-def load_aws_credentials():
-    """Load AWS credentials from .env file."""
-    if not Path(".env").exists():
-        raise FileNotFoundError(".env file not found")
-
-    load_dotenv()
-    required_vars = [
-        "CUSTOM_AWS_ACCESS_KEY_ID",
-        "CUSTOM_AWS_SECRET_ACCESS_KEY",
-        "CUSTOM_AWS_REGION_NAME",
-    ]
-
-    for var in required_vars:
-        if not os.getenv(var):
-            raise ValueError(f"Required environment variable {var} not found in .env file")
-
-
 def market_scan_process():
-    """Process for handling market scanning."""
+    """Market scan process."""
     while True:
         try:
-            # Create event loop for this process
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete(async_market_scan_handler())
+            asyncio.run(async_market_scan_handler())
+            time.sleep(60)  # Check every minute
         except Exception as e:
-            print(f"Error in market scan process: {e}")
-        time.sleep(10)
+            logger.error(f"Error in market scan process: {e}")
+            time.sleep(60)
 
 
 def git_process():
-    """Process for handling git operations."""
+    """Git process for accepting repo invitations."""
     while True:
         try:
-            # Create event loop for this process
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete(accept_repo_invitations(SETTINGS.github_pat))
+            asyncio.run(accept_repo_invitations(SETTINGS.github_pat))
+            time.sleep(60)  # Check every minute
         except Exception as e:
             print(f"Error in git process: {e}")
-        time.sleep(10)
+            time.sleep(60)
 
 
 def solve_instances_process():
-    """Process for handling instance solving."""
+    """Solve instances process."""
     while True:
         try:
             solve_instances_handler()
+            time.sleep(60)  # Run every minute
         except Exception as e:
             print(f"Error in solve instances process: {e}")
-        time.sleep(10)
+            time.sleep(60)
 
 
 def main():
-    # Load AWS credentials
-    load_aws_credentials()
     print("Starting all services in parallel...")
 
     # Create processes
