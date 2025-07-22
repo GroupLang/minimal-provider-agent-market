@@ -109,18 +109,31 @@ def add_and_commit(repo_path: str) -> None:
             ]
 
             if files_to_stage:
-                # Stage files that definitely exist
+                # Stage files that definitely exist and are not empty
                 files_to_add = []
                 for f in files_to_stage:
                     file_path = os.path.join(repo_path, f)
                     if os.path.exists(file_path):
-                        files_to_add.append(f)
+                        # Check if file is empty or contains only whitespace
+                        try:
+                            with open(file_path, 'r', encoding='utf-8', errors='ignore') as file:
+                                content = file.read().strip()
+                                if content:  # Only add non-empty files
+                                    files_to_add.append(f)
+                                else:
+                                    logger.info(f"Skipping empty file: {f}")
+                        except (UnicodeDecodeError, IOError):
+                            # For binary files or files we can't read, check file size
+                            if os.path.getsize(file_path) > 0:
+                                files_to_add.append(f)
+                            else:
+                                logger.info(f"Skipping empty binary file: {f}")
                     else:
                         logger.warning(f"Skipping non-existent file during staging: {f}")
 
                 if files_to_add:
                     repo.index.add(files_to_add)
-                logger.info("Changes staged successfully (excluding aider files).")
+                logger.info("Changes staged successfully (excluding aider and empty files).")
 
                 commit_message = generate_commit_message(repo_path)
                 if commit_message is None:

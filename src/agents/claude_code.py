@@ -53,7 +53,7 @@ def get_container_kwargs(
     entrypoint = [
         "sh",
         "-c",
-        f"chown -R claude:claude /workspace && chmod -R 755 /workspace && {' '.join(claude_code_cmd)}",
+        f"sudo chown -R claude:claude /workspace && sudo chmod -R 755 /workspace && git config --global --add safe.directory /workspace && {' '.join(claude_code_cmd)}",
     ]
 
     env_vars = {
